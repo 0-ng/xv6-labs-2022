@@ -55,6 +55,8 @@ sys_sleep(void)
   uint ticks0;
 
   argint(0, &n);
+  if(n < 0)
+    n = 0;
   acquire(&tickslock);
   ticks0 = ticks;
   while(ticks - ticks0 < n){
@@ -88,4 +90,20 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64
+sys_trace(void)
+{
+    int n;
+    argint(0, &n);
+    myproc()->mask=n;
+    return 0;
+}
+
+uint64
+sys_sysinfo() {
+    uint64 p;
+    argaddr(0, &p);
+    return sysinfo(p);
 }
