@@ -100,3 +100,10 @@ sys_trace(void)
     myproc()->mask=n;
     return 0;
 }
+
+uint64
+sys_sysinfo() {
+    uint64 p;
+    argaddr(0, &p);
+    return sysinfo(p);
+}

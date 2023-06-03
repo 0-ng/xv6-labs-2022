@@ -5,6 +5,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "sysinfo.h"
 
 struct cpu cpus[NCPU];
 
@@ -18,6 +19,8 @@ struct spinlock pid_lock;
 extern void forkret(void);
 
 static void freeproc(struct proc *p);
+
+extern uint64 getFreeMemory();
 
 extern char trampoline[]; // trampoline.S
 
@@ -654,4 +657,24 @@ procdump(void) {
         printf("%d %s %s", p->pid, state, p->name);
         printf("\n");
     }
+}
+
+int
+sysinfo(uint64 addr) {
+    struct proc *p ;
+    struct sysinfo st;
+    st.freemem=getFreeMemory();
+    st.nproc=0;
+
+    for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if (p->state != UNUSED) {
+            st.nproc++;
+        }
+        release(&p->lock);
+    }
+    p = myproc();
+    if(copyout(p->pagetable, addr, (char *)&st, sizeof(st)) < 0)
+        return -1;
+    return 0;
 }
