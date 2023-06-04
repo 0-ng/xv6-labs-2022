@@ -428,11 +428,11 @@ vmprint_(pagetable_t pagetable,uint8 depth) {
         pte_t pte = pagetable[i];
         if (pte & PTE_V) {
             for(uint8 j=0;j<depth;j++)printf(" ..");
-            printf("%d: pte %p pa %p\n", i,pte,PTE2PA(pte));
-        }
-        if((pte & PTE_V) && ((pte & (PTE_R | PTE_W | PTE_X)) == 0)){
             uint64 child = PTE2PA(pte);
-            vmprint_((pagetable_t) child,depth+1);
+            printf("%d: pte %p pa %p\n", i,pte,child);
+            if((pte & (PTE_R | PTE_W | PTE_X)) == 0){
+                vmprint_((pagetable_t) child,depth+1);
+            }
         }
     }
 }
