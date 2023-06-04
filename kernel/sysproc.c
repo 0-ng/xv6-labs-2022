@@ -74,6 +74,14 @@ sys_sleep(void)
 int
 sys_pgaccess(void)
 {
+//  int n;
+//  uint64 p,ret;
+//  argaddr(0, &p);
+//  argint(1, &n);
+//  argaddr(2, &ret);
+//  for(;n>=0;n--){
+//      if(((char *)p)[n*PGSIZE])(*((char*)ret))|=(1<<n);
+//  }
   // lab pgtbl: your code here.
   return 0;
 }
