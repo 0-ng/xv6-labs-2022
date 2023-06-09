@@ -4,12 +4,14 @@
 #include "user/user.h"
 
 int g(int x) {
+    printf("x=%d\n",x,x);
   return x+3;
 }
 
 int f(int x) {
-  return g(x);
+    return g(x);
 }
+
 
 void main(void) {
   printf("%d %d\n", f(8)+1, 13);
