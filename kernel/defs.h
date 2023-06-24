@@ -98,6 +98,10 @@ void kfree(void *);
 
 void kinit(void);
 
+uint8 kallocWithCOW(uint64);
+
+uint32 getReferenceCount(uint64 pa);
+
 // log.c
 void initlog(int, struct superblock *);
 
@@ -118,6 +122,8 @@ int pipewrite(struct pipe *, uint64, int);
 
 // printf.c
 void printf(char *, ...);
+
+void Dprintf(char *, ...);
 
 void panic(char *) __attribute__((noreturn));
 
@@ -264,6 +270,8 @@ uint64 uvmalloc(pagetable_t, uint64, uint64, int);
 
 uint64 uvmdealloc(pagetable_t, uint64, uint64);
 int uvmcopy(pagetable_t, pagetable_t, uint64);
+int uvmcopyWithCOW(pagetable_t, pagetable_t, uint64);
+
 void uvmfree(pagetable_t, uint64);
 
 void uvmunmap(pagetable_t, uint64, uint64, int);
@@ -298,3 +306,5 @@ void virtio_disk_intr(void);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
+
+#define DEBUG 1

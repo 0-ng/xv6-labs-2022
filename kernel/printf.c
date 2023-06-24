@@ -115,12 +115,26 @@ printf(char *fmt, ...) {
 }
 
 void
+backtrace(void){
+    uint64 s0=r_fp();
+    for(;;){
+        if(PGROUNDDOWN(s0)==s0)break;
+//        printf("%p\n",*(uint64 *)(s0-16));
+        printf("%p\n",*(uint64 *)(s0-8));
+        s0=*(uint64 *)(s0-16);
+//        break;
+    }
+}
+
+void
 panic(char *s) {
     pr.locking = 0;
+    backtrace();
     printf("panic: ");
     printf(s);
     printf("\n");
     panicked = 1; // freeze uart output from other CPUs
+
     for (;;);
 }
 
@@ -128,4 +142,62 @@ void
 printfinit(void) {
     initlock(&pr.lock, "pr");
     pr.locking = 1;
+}
+
+void
+Dprintf(char *fmt, ...) {
+#ifdef DEBUG
+    va_list ap;
+    int i, c, locking;
+    char *s;
+
+    locking = pr.locking;
+    if (locking)
+        acquire(&pr.lock);
+
+    if (fmt == 0)
+        panic("null fmt");
+
+    va_start(ap, fmt);
+    for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
+        if (c != '%') {
+            consputc(c);
+            continue;
+        }
+        c = fmt[++i] & 0xff;
+        if (c == 0)
+            break;
+        switch (c) {
+            case 'd':
+                printint(va_arg(ap,
+                int), 10, 1);
+                break;
+            case 'x':
+                printint(va_arg(ap,
+                int), 16, 1);
+                break;
+            case 'p':
+                printptr(va_arg(ap, uint64));
+                break;
+            case 's':
+                if ((s = va_arg(ap, char*)) == 0)
+                s = "(null)";
+                for (; *s; s++)
+                    consputc(*s);
+                break;
+            case '%':
+                consputc('%');
+                break;
+            default:
+                // Print unknown % sequence to draw attention.
+                consputc('%');
+                consputc(c);
+                break;
+        }
+    }
+    va_end(ap);
+
+    if (locking)
+        release(&pr.lock);
+#endif
 }

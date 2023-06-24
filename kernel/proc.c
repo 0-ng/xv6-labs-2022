@@ -277,7 +277,8 @@ fork(void) {
     }
 
     // Copy user memory from parent to child.
-    if (uvmcopy(p->pagetable, np->pagetable, p->sz) < 0) {
+    Dprintf("forking prepare uvmcopyWithCOW\n");
+    if (uvmcopyWithCOW(p->pagetable, np->pagetable, p->sz) < 0) {
         freeproc(np);
         release(&np->lock);
         return -1;

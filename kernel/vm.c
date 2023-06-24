@@ -151,6 +151,18 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm) {
         *pte = PA2PTE(pa) | perm | PTE_V;
         if (a == last)
             break;
+
+        {
+            Dprintf("pa=%p,flag=");
+            if(*pte & PTE_V)Dprintf("v,");
+            if(*pte & PTE_R)Dprintf("r,");
+            if(*pte & PTE_W)Dprintf("w,");
+            if(*pte & PTE_X)Dprintf("x,");
+            if(*pte & PTE_U)Dprintf("u,");
+            if(*pte & PTE_COW)Dprintf("cow,");
+            Dprintf("\n");
+        }
+
         a += PGSIZE;
         pa += PGSIZE;
     }
@@ -317,6 +329,42 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
     return -1;
 }
 
+int
+uvmcopyWithCOW(pagetable_t old, pagetable_t new, uint64 sz) {
+    pte_t *pte;
+    uint64 pa, i;
+    uint flags;
+
+    for (i = 0; i < sz; i += PGSIZE) {
+        if ((pte = walk(old, i, 0)) == 0)
+            panic("uvmcopy: pte should exist");
+        if ((*pte & PTE_V) == 0)
+            panic("uvmcopy: page not present");
+        pa = PTE2PA(*pte);
+        if (*pte & PTE_W) {
+            *pte &= ~PTE_W;
+            *pte |= PTE_COW;
+//            printf("set cow done pa=%p\n",pa);
+        }else{
+            Dprintf("without PTE_COW pa=%p\n",pa);
+        }
+        flags = PTE_FLAGS(*pte);
+        if(kallocWithCOW(pa)!=0){
+            Dprintf("kallocWithCOW(pa)!=0\n");
+            goto err;
+        }
+        if (mappages(new, i, PGSIZE, pa, flags) != 0) {
+            Dprintf("mappages(new, i, PGSIZE, pa, flags)\n");
+            goto err;
+        }
+    }
+    return 0;
+
+    err:
+    uvmunmap(new, 0, i / PGSIZE, 1);
+    return -1;
+}
+
 // mark a PTE invalid for user access.
 // used by exec for the user stack guard page.
 void
@@ -338,6 +386,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
 
     while (len > 0) {
         va0 = PGROUNDDOWN(dstva);
+//        *(char *)va0 = 0;
         pa0 = walkaddr(pagetable, va0);
         if (pa0 == 0)
             return -1;
@@ -345,6 +394,7 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
         if (n > len)
             n = len;
         memmove((void *) (pa0 + (dstva - va0)), src, n);
+//        memmove((void *)dstva, src, n);
 
         len -= n;
         src += n;

@@ -16,42 +16,18 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b05198a6-3a68-44bb-9010-90e170dbb68b" name="Changes" comment="traps">
+    <list default="true" id="b05198a6-3a68-44bb-9010-90e170dbb68b" name="Changes" comment="format">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/console.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/console.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/defs.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/defs.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/elf.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/elf.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/exec.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/exec.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/file.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/file.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/file.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/file.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/fs.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/fs.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/fs.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/fs.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/kalloc.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/kalloc.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/log.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/log.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/pipe.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/pipe.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/plic.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/plic.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/printf.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/printf.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/proc.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/proc.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/proc.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/proc.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/ramdisk.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/ramdisk.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/riscv.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/riscv.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sleeplock.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sleeplock.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sleeplock.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sleeplock.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/spinlock.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/spinlock.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/spinlock.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/spinlock.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/start.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/start.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/stat.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/stat.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/string.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/string.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/syscall.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/syscall.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sysfile.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sysfile.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sysproc.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sysproc.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/trap.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/trap.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/types.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/types.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/uart.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/uart.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/virtio.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/virtio.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/virtio_disk.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/virtio_disk.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/vm.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/vm.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/cowtest.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/cowtest.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/usertests.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/usertests.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,6 +82,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
@@ -136,7 +113,12 @@
       <workItem from="1686315674419" duration="1297000" />
       <workItem from="1686321123324" duration="9202000" />
       <workItem from="1686583015968" duration="454000" />
-      <workItem from="1686583475281" duration="1324000" />
+      <workItem from="1686583475281" duration="5224000" />
+      <workItem from="1687361888034" duration="4410000" />
+      <workItem from="1687442325719" duration="3099000" />
+      <workItem from="1687486717433" duration="2243000" />
+      <workItem from="1687500236645" duration="3727000" />
+      <workItem from="1687590889584" duration="10328000" />
     </task>
     <task id="LOCAL-00001" summary="page accessed">
       <created>1685888180190</created>
@@ -152,7 +134,14 @@
       <option name="project" value="LOCAL" />
       <updated>1686330540368</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="format">
+      <created>1686585301147</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1686585301147</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -178,7 +167,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="page accessed" />
     <MESSAGE value="traps" />
-    <option name="LAST_COMMIT_MESSAGE" value="traps" />
+    <MESSAGE value="format" />
+    <option name="LAST_COMMIT_MESSAGE" value="format" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -6,6 +6,10 @@
 #include "proc.h"
 #include "defs.h"
 
+
+#define STORE_PAGE_FAULT   15
+#define INSTRUCTION_PAGE_FAULT   12
+
 struct spinlock tickslock;
 uint ticks;
 
@@ -64,9 +68,50 @@ usertrap(void) {
         syscall();
     } else if ((which_dev = devintr()) != 0) {
         // ok
-    } else {
-        printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
+    } else if(r_scause() == STORE_PAGE_FAULT||r_scause() == INSTRUCTION_PAGE_FAULT){
+        uint64 va=r_stval();
+
+        va = PGROUNDDOWN(va);
+
+//        printf("log va=%p\n",va);
+        pte_t *pte = walk(p->pagetable, va, 0);
+//        printf("log pte=%p\n",pte);
+        if((*pte & PTE_COW)==0){
+            printf("usertrap(): unexpected store page fault, scause %d pid=%d\n", r_scause(), p->pid);
+            printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+            printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
+            setkilled(p);
+        }else{
+            uint64 pa=PTE2PA(*pte);
+//            if(getReferenceCount(pa)==1){
+//                *pte |= PTE_W;
+//                *pte &= ~PTE_COW;
+//            }else{
+                uint64 flags = PTE_FLAGS(*pte);
+                flags |= PTE_W;
+                flags &= ~PTE_COW;
+                *pte &= ~PTE_V;
+                char *mem;
+                if ((mem = kalloc()) == 0){
+                    setkilled(p);
+                }else{
+                    memmove(mem, (char *) pa, PGSIZE);
+                    kfree((void *)pa);
+                    Dprintf("map pa=%p to=%p\n",pa,mem);
+                    if (mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags) != 0) {
+                        kfree(mem);
+                        setkilled(p);
+                    }
+                }
+
+//            }
+
+        }
+
+    }else {
+        printf("usertrap(): unexpected scause %d pid=%d\n", r_scause(), p->pid);
         printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+        printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
         setkilled(p);
     }
 
@@ -142,6 +187,7 @@ kerneltrap() {
     if ((which_dev = devintr()) == 0) {
         printf("scause %p\n", scause);
         printf("sepc=%p stval=%p\n", r_sepc(), r_stval());
+        printf("satp=%p sstatus=%p\n", r_satp(), r_sstatus());
         panic("kerneltrap");
     }
 

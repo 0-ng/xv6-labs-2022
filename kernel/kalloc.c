@@ -23,10 +23,16 @@ struct {
     struct run *freelist;
 } kmem;
 
+uint32 referenceCount[(PHYSTOP-KERNBASE)/PGSIZE];
+
+uint8 init=0;
+
 void
 kinit() {
     initlock(&kmem.lock, "kmem");
     freerange(end, (void *) PHYSTOP);
+    memset(referenceCount, 0, sizeof referenceCount);
+    init=1;
 }
 
 void
@@ -43,6 +49,13 @@ freerange(void *pa_start, void *pa_end) {
 // initializing the allocator; see kinit above.)
 void
 kfree(void *pa) {
+    if(init){
+        Dprintf("reference count[%d] sub pa=%p\n",referenceCount[(uint64)(pa-KERNBASE)/PGSIZE],pa);
+        if(--referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]>0){
+            return;
+        }
+        Dprintf("reference count free pa=%p\n",pa);
+    }
     struct run *r;
 
     if (((uint64) pa % PGSIZE) != 0 || (char *) pa < end || (uint64) pa >= PHYSTOP)
@@ -72,7 +85,29 @@ kalloc(void) {
         kmem.freelist = r->next;
     release(&kmem.lock);
 
-    if (r)
+    if (r){
         memset((char *) r, 5, PGSIZE); // fill with junk
+        uint64 pa=(uint64)r;
+        referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]=1;
+
+        Dprintf("init reference count pa=%p\n",pa);
+//        printFlag(pa);
+    }
     return (void *) r;
+}
+
+uint8
+kallocWithCOW(uint64 pa) {
+    if(referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]==0){
+        Dprintf("reference count zero\n");
+        return 1;
+    }
+    Dprintf("reference count[%d] add pa=%p\n",referenceCount[(uint64)(pa-KERNBASE)/PGSIZE],pa);
+    referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]++;
+    return 0;
+}
+
+uint32
+getReferenceCount(uint64 pa){
+    return referenceCount[(uint64)(pa-KERNBASE)/PGSIZE];
 }
