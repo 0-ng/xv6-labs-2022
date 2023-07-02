@@ -16,14 +16,9 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b05198a6-3a68-44bb-9010-90e170dbb68b" name="Changes" comment="format">
+    <list default="true" id="b05198a6-3a68-44bb-9010-90e170dbb68b" name="Changes" comment="cow fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/defs.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/defs.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/pipe.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/pipe.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sysfile.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sysfile.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/trap.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/trap.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/vm.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/vm.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/cowtest.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/cowtest.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/kalloc.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/kalloc.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +112,8 @@
       <workItem from="1687590889584" duration="10328000" />
       <workItem from="1687610276441" duration="7963000" />
       <workItem from="1687700040828" duration="3087000" />
-      <workItem from="1688282409111" duration="1173000" />
+      <workItem from="1688282409111" duration="1332000" />
+      <workItem from="1688283805579" duration="596000" />
     </task>
     <task id="LOCAL-00001" summary="page accessed">
       <created>1685888180190</created>
@@ -140,7 +136,23 @@
       <option name="project" value="LOCAL" />
       <updated>1686585301147</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="cow fix">
+      <option name="closed" value="true" />
+      <created>1688283589331</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1688283589331</updated>
+    </task>
+    <task id="LOCAL-00005" summary="cow fix">
+      <option name="closed" value="true" />
+      <created>1688283643318</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1688283643318</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -167,7 +179,8 @@
     <MESSAGE value="page accessed" />
     <MESSAGE value="traps" />
     <MESSAGE value="format" />
-    <option name="LAST_COMMIT_MESSAGE" value="format" />
+    <MESSAGE value="cow fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="cow fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

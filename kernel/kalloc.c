@@ -23,15 +23,19 @@ struct {
     struct run *freelist;
 } kmem;
 
-uint32 referenceCount[(PHYSTOP-KERNBASE)/PGSIZE];
+struct {
+    struct spinlock lock;
+    uint32 count[(PHYSTOP-KERNBASE)/PGSIZE];
+} refer;
+
 
 uint8 init=0;
 
 void
 kinit() {
     initlock(&kmem.lock, "kmem");
+    initlock(&refer.lock, "refer");
     freerange(end, (void *) PHYSTOP);
-    memset(referenceCount, 0, sizeof referenceCount);
     init=1;
 }
 
@@ -50,8 +54,12 @@ freerange(void *pa_start, void *pa_end) {
 void
 kfree(void *pa) {
     if(init){
-        Dprintf("reference count[%d] sub pa=%p\n",referenceCount[(uint64)(pa-KERNBASE)/PGSIZE],pa);
-        if(--referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]>0){
+        uint32 count;
+        acquire(&refer.lock);
+        Dprintf("reference count[%d] sub pa=%p\n",refer.count[(uint64)(pa-KERNBASE)/PGSIZE],pa);
+        count=--refer.count[(uint64)(pa-KERNBASE)/PGSIZE];
+        release(&refer.lock);
+        if(count>0){
             return;
         }
         Dprintf("reference count free pa=%p\n",pa);
@@ -88,8 +96,7 @@ kalloc(void) {
     if (r){
         memset((char *) r, 5, PGSIZE); // fill with junk
         uint64 pa=(uint64)r;
-        referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]=1;
-
+        refer.count[(uint64)(pa-KERNBASE)/PGSIZE]=1;
         Dprintf("init reference count pa=%p\n",pa);
 //        printFlag(pa);
     }
@@ -98,16 +105,20 @@ kalloc(void) {
 
 uint8
 kallocWithCOW(uint64 pa) {
-    if(referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]==0){
+    acquire(&refer.lock);
+    if(refer.count[(uint64)(pa-KERNBASE)/PGSIZE]==0){
+        release(&refer.lock);
         Dprintf("reference count zero\n");
         return 1;
     }
-    Dprintf("reference count[%d] add pa=%p\n",referenceCount[(uint64)(pa-KERNBASE)/PGSIZE],pa);
-    referenceCount[(uint64)(pa-KERNBASE)/PGSIZE]++;
+    refer.count[(uint64)(pa-KERNBASE)/PGSIZE]++;
+    Dprintf("reference count[%d] add pa=%p\n",refer.count[(uint64)(pa-KERNBASE)/PGSIZE],pa);
+    release(&refer.lock);
     return 0;
 }
 
 uint32
 getReferenceCount(uint64 pa){
-    return referenceCount[(uint64)(pa-KERNBASE)/PGSIZE];
+    // todo lock
+    return refer.count[(uint64)(pa-KERNBASE)/PGSIZE];
 }
