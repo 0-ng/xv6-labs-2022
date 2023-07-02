@@ -47,10 +47,11 @@ copyonwrite(uint64 va) {
     }
 
     uint64 pa = PTE2PA(*pte);
-//            if(getReferenceCount(pa)==1){
-//                *pte |= PTE_W;
-//                *pte &= ~PTE_COW;
-//            }else{
+    if(getReferenceCount(pa)==1){
+        *pte |= PTE_W;
+        *pte &= ~PTE_COW;
+        return 1;
+    }
     uint64 flags = PTE_FLAGS(*pte);
     *pte &= ~PTE_V;
     flags |= PTE_W;
@@ -118,39 +119,6 @@ usertrap(void) {
             printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
             setkilled(p);
         }
-//        va = PGROUNDDOWN(va);
-//        pte_t *pte = walk(p->pagetable, va, 0);
-//        if((*pte & PTE_COW)==0){
-//            printf("usertrap(): unexpected store page fault, scause %d pid=%d\n", r_scause(), p->pid);
-//            printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
-//            printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
-//            setkilled(p);
-//        }else{
-//            uint64 pa=PTE2PA(*pte);
-////            if(getReferenceCount(pa)==1){
-////                *pte |= PTE_W;
-////                *pte &= ~PTE_COW;
-////            }else{
-//                uint64 flags = PTE_FLAGS(*pte);
-//                flags |= PTE_W;
-//                flags &= ~PTE_COW;
-//                *pte &= ~PTE_V;
-//                char *mem;
-//                if ((mem = kalloc()) == 0){
-//                    setkilled(p);
-//                }else{
-//                    memmove(mem, (char *) pa, PGSIZE);
-//                    kfree((void *)pa);
-//                    Dprintf("map pa=%p to=%p\n",pa,mem);
-//                    if (mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags) != 0) {
-//                        kfree(mem);
-//                        setkilled(p);
-//                    }
-//                }
-//
-////            }
-
-//        }
 
     } else {
         printf("[usertrap] unexpected scause %d pid=%d\n", r_scause(), p->pid);
