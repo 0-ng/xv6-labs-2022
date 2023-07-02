@@ -31,6 +31,47 @@ trapinithart(void) {
     w_stvec((uint64) kernelvec);
 }
 
+uint8
+copyonwrite(uint64 va) {
+    struct proc *p = myproc();
+    va = PGROUNDDOWN(va);
+    pte_t *pte = walk(p->pagetable, va, 0);
+    Dprintf("[copyonwrite]va=%p, pte=%p\n", va, *pte);
+    if ((*pte & PTE_COW) == 0) {
+        Dprintf("[copyonwrite]without cow tag\n");
+        return 0;
+//        printf("usertrap(): unexpected store page fault, scause %d pid=%d\n", r_scause(), p->pid);
+//        printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+//        printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
+//        setkilled(p);
+    }
+
+    uint64 pa = PTE2PA(*pte);
+//            if(getReferenceCount(pa)==1){
+//                *pte |= PTE_W;
+//                *pte &= ~PTE_COW;
+//            }else{
+    uint64 flags = PTE_FLAGS(*pte);
+    *pte &= ~PTE_V;
+    flags |= PTE_W;
+    flags &= ~PTE_COW;
+    char *mem;
+    if ((mem = kalloc()) == 0) {
+        Dprintf("[copyonwrite]mem = kalloc() error\n");
+        return 0;
+    }
+    memmove(mem, (char *) pa, PGSIZE);
+    kfree((void *) pa);
+    Dprintf("[copyonwrite]map pa=%p to=%p\n", pa, mem);
+    if (mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags) != 0) {
+        Dprintf("[copyonwrite]mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags) error\n");
+        kfree(mem);
+        return 0;
+    }
+    Dprintf("[copyonwrite]map pa=%p to=%p end\n", pa, mem);
+    return 1;
+}
+
 //
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
@@ -40,7 +81,7 @@ usertrap(void) {
     int which_dev = 0;
 
     if ((r_sstatus() & SSTATUS_SPP) != 0)
-        panic("usertrap: not from user mode");
+        panic("[usertrap] not from user mode");
 
     // send interrupts and exceptions to kerneltrap(),
     // since we're now in the kernel.
@@ -68,60 +109,66 @@ usertrap(void) {
         syscall();
     } else if ((which_dev = devintr()) != 0) {
         // ok
-    } else if(r_scause() == STORE_PAGE_FAULT||r_scause() == INSTRUCTION_PAGE_FAULT){
-        uint64 va=r_stval();
-
-        va = PGROUNDDOWN(va);
-
-//        printf("log va=%p\n",va);
-        pte_t *pte = walk(p->pagetable, va, 0);
-//        printf("log pte=%p\n",pte);
-        if((*pte & PTE_COW)==0){
-            printf("usertrap(): unexpected store page fault, scause %d pid=%d\n", r_scause(), p->pid);
+    } else if (r_scause() == STORE_PAGE_FAULT || r_scause() == INSTRUCTION_PAGE_FAULT) {
+        uint64 va = r_stval();
+        Dprintf("[usertrap]va=%p\n", va);
+        if (copyonwrite(va) == 0) {
+            printf("[usertrap] unexpected store page fault, scause %d pid=%d\n", r_scause(), p->pid);
             printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
             printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
             setkilled(p);
-        }else{
-            uint64 pa=PTE2PA(*pte);
-//            if(getReferenceCount(pa)==1){
-//                *pte |= PTE_W;
-//                *pte &= ~PTE_COW;
-//            }else{
-                uint64 flags = PTE_FLAGS(*pte);
-                flags |= PTE_W;
-                flags &= ~PTE_COW;
-                *pte &= ~PTE_V;
-                char *mem;
-                if ((mem = kalloc()) == 0){
-                    setkilled(p);
-                }else{
-                    memmove(mem, (char *) pa, PGSIZE);
-                    kfree((void *)pa);
-                    Dprintf("map pa=%p to=%p\n",pa,mem);
-                    if (mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags) != 0) {
-                        kfree(mem);
-                        setkilled(p);
-                    }
-                }
-
-//            }
-
         }
+//        va = PGROUNDDOWN(va);
+//        pte_t *pte = walk(p->pagetable, va, 0);
+//        if((*pte & PTE_COW)==0){
+//            printf("usertrap(): unexpected store page fault, scause %d pid=%d\n", r_scause(), p->pid);
+//            printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+//            printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
+//            setkilled(p);
+//        }else{
+//            uint64 pa=PTE2PA(*pte);
+////            if(getReferenceCount(pa)==1){
+////                *pte |= PTE_W;
+////                *pte &= ~PTE_COW;
+////            }else{
+//                uint64 flags = PTE_FLAGS(*pte);
+//                flags |= PTE_W;
+//                flags &= ~PTE_COW;
+//                *pte &= ~PTE_V;
+//                char *mem;
+//                if ((mem = kalloc()) == 0){
+//                    setkilled(p);
+//                }else{
+//                    memmove(mem, (char *) pa, PGSIZE);
+//                    kfree((void *)pa);
+//                    Dprintf("map pa=%p to=%p\n",pa,mem);
+//                    if (mappages(p->pagetable, va, PGSIZE, (uint64) mem, flags) != 0) {
+//                        kfree(mem);
+//                        setkilled(p);
+//                    }
+//                }
+//
+////            }
 
-    }else {
-        printf("usertrap(): unexpected scause %d pid=%d\n", r_scause(), p->pid);
+//        }
+
+    } else {
+        printf("[usertrap] unexpected scause %d pid=%d\n", r_scause(), p->pid);
         printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
         printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
         setkilled(p);
     }
-
+    Dprintf("[usertrap] before kill\n");
     if (killed(p))
         exit(-1);
 
     // give up the CPU if this is a timer interrupt.
+    Dprintf("[usertrap] before yield\n");
     if (which_dev == 2)
         yield();
 
+
+    Dprintf("[usertrap] before return\n");
     usertrapret();
 }
 
@@ -184,7 +231,16 @@ kerneltrap() {
     if (intr_get() != 0)
         panic("kerneltrap: interrupts enabled");
 
-    if ((which_dev = devintr()) == 0) {
+    if (r_scause() == STORE_PAGE_FAULT || r_scause() == INSTRUCTION_PAGE_FAULT) {
+        uint64 va = r_stval();
+        Dprintf("kerneltrap() va=%p\n", va);
+        if (copyonwrite(va) == 0) {
+            printf("kerneltrap(): unexpected store page fault, scause %d pid=%d\n", r_scause(), myproc()->pid);
+            printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+            printf("            satp=%p sstatus=%p\n", r_satp(), r_sstatus());
+            panic("store page fault");
+        }
+    } else if ((which_dev = devintr()) == 0) {
         printf("scause %p\n", scause);
         printf("sepc=%p stval=%p\n", r_sepc(), r_stval());
         printf("satp=%p sstatus=%p\n", r_satp(), r_sstatus());

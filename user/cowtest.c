@@ -185,17 +185,14 @@ char junk3[4096];
 void
 filetest() {
     sleep(5);
-    printf("\nfile: \n");
 
     buf[0] = 99;
 
     for (int i = 0; i < 1; i++) {
-        printf("\nbefore pipe\n");
         if (pipe(fds) != 0) {
             printf("pipe() failed\n");
             exit(-1);
         }
-        printf("\nbefore fork\n");
         int pid = fork();
         if (pid < 0) {
             printf("fork failed\n");
@@ -203,28 +200,23 @@ filetest() {
         }
         if (pid == 0) {
             sleep(1);
-            printf("\nbefore read\n");
             if (read(fds[0], buf, sizeof(i)) != sizeof(i)) {
                 sleep(getpid());
                 printf("error: read failed\n");
                 exit(1);
             }
             sleep(1);
-            printf("\nbefore get\n");
             int j = *(int *) buf;
             if (j != i) {
                 printf("error: read the wrong value\n");
                 exit(1);
             }
-            printf("\nread %d\n",j);
             exit(0);
         }
-        printf("\nbefore write\n");
         if (write(fds[1], &i, sizeof(i)) != sizeof(i)) {
             printf("error: write failed\n");
             exit(-1);
         }
-        printf("write %d\n",i);
     }
 
     int xstatus = 0;
@@ -245,14 +237,14 @@ filetest() {
 
 int
 main(int argc, char *argv[]) {
-//    simpletest();
-//
-//  // check that the first simpletest() freed the physical memory.
-//  simpletest();
-//
-//  threetest();
-//  threetest();
-//  threetest();
+    simpletest();
+
+  // check that the first simpletest() freed the physical memory.
+  simpletest();
+
+  threetest();
+  threetest();
+  threetest();
 
   filetest();
 

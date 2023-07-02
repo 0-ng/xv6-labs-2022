@@ -64,6 +64,7 @@ sys_dup(void) {
 
 uint64
 sys_read(void) {
+    Dprintf("in sys_read\n");
     struct file *f;
     int n;
     uint64 p;

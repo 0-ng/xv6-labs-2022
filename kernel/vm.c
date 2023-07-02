@@ -120,6 +120,32 @@ walkaddr(pagetable_t pagetable, uint64 va) {
     return pa;
 }
 
+uint64
+walkaddrwithwrite(pagetable_t pagetable, uint64 va) {
+    pte_t *pte;
+    uint64 pa;
+
+    if (va >= MAXVA)
+        return 0;
+
+    pte = walk(pagetable, va, 0);
+    if (pte == 0)
+        return 0;
+    if ((*pte & PTE_V) == 0)
+        return 0;
+    if ((*pte & PTE_U) == 0)
+        return 0;
+    if (*pte & PTE_W){
+        pa = PTE2PA(*pte);
+        return pa;
+    }
+    Dprintf("[walkaddrwithwrite] va=%p\n",va);
+    if(copyonwrite(va)==0){
+        return 0;
+    }
+    return walkaddr(pagetable,va);
+}
+
 // add a mapping to the kernel page table.
 // only used when booting.
 // does not flush TLB or enable paging.
@@ -151,7 +177,7 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm) {
         *pte = PA2PTE(pa) | perm | PTE_V;
         if (a == last)
             break;
-
+        Dprintf("mappages mid\n");
         {
             Dprintf("pa=%p,flag=");
             if(*pte & PTE_V)Dprintf("v,");
@@ -382,19 +408,21 @@ uvmclear(pagetable_t pagetable, uint64 va) {
 // Return 0 on success, -1 on error.
 int
 copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len) {
+    Dprintf("[copyout]\n");
     uint64 n, va0, pa0;
 
     while (len > 0) {
         va0 = PGROUNDDOWN(dstva);
-//        *(char *)va0 = 0;
-        pa0 = walkaddr(pagetable, va0);
+        Dprintf("[copyout] dstva=%p, va=%p\n",dstva,va0);
+//        pa0 = walkaddr(pagetable, va0);
+        pa0 = walkaddrwithwrite(pagetable, va0);
         if (pa0 == 0)
             return -1;
         n = PGSIZE - (dstva - va0);
         if (n > len)
             n = len;
+        Dprintf("[copyout] memmove pa=%p src=%p\n",pa0,src);
         memmove((void *) (pa0 + (dstva - va0)), src, n);
-//        memmove((void *)dstva, src, n);
 
         len -= n;
         src += n;

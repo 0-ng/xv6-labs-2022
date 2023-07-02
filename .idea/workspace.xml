@@ -17,17 +17,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b05198a6-3a68-44bb-9010-90e170dbb68b" name="Changes" comment="format">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/defs.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/defs.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/kalloc.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/kalloc.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/printf.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/printf.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/proc.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/proc.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/riscv.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/riscv.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/pipe.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/pipe.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/sysfile.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sysfile.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/trap.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/trap.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/vm.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/vm.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/user/cowtest.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/cowtest.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/usertests.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/usertests.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,6 +115,9 @@
       <workItem from="1687486717433" duration="2243000" />
       <workItem from="1687500236645" duration="3727000" />
       <workItem from="1687590889584" duration="10328000" />
+      <workItem from="1687610276441" duration="7963000" />
+      <workItem from="1687700040828" duration="3087000" />
+      <workItem from="1688282409111" duration="1173000" />
     </task>
     <task id="LOCAL-00001" summary="page accessed">
       <created>1685888180190</created>

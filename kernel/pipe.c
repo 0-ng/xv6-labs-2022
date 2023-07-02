@@ -101,6 +101,7 @@ pipewrite(struct pipe *pi, uint64 addr, int n) {
 
 int
 piperead(struct pipe *pi, uint64 addr, int n) {
+    Dprintf("[piperead]\n");
     int i;
     struct proc *pr = myproc();
     char ch;
