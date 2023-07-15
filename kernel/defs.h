@@ -82,6 +82,7 @@ int             pipewrite(struct pipe*, uint64, int);
 
 // printf.c
 void            printf(char*, ...);
+void            Dprintf(char*, ...);
 void            panic(char*) __attribute__((noreturn));
 void            printfinit(void);
 
@@ -115,7 +116,7 @@ void            procdump(void);
 void            swtch(struct context*, struct context*);
 
 // spinlock.c
-void            acquire(struct spinlock*);
+void acquire(struct spinlock*);
 int             holding(struct spinlock*);
 void            initlock(struct spinlock*, char*);
 void            release(struct spinlock*);
@@ -237,3 +238,5 @@ int             sockread(struct sock *, uint64, int);
 int             sockwrite(struct sock *, uint64, int);
 void            sockrecvudp(struct mbuf*, uint32, uint16, uint16);
 #endif
+
+//#define DEBUG 0
