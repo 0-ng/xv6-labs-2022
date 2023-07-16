@@ -100,11 +100,7 @@ e1000_transmit(struct mbuf *m) {
     // the TX descriptor ring so that the e1000 sends it. Stash
     // a pointer so that it can be freed after sending.
     //
-    struct udp *udphdr;
-    struct ip *iphdr;
-    struct eth *ethhdr;
-    for(int i=sizeof(*udphdr)+sizeof(*iphdr)+sizeof(*ethhdr);i<m->len;i++){
-    }
+//    printf("[e1000_transmit]kernel cpu id=%d\n",cpuid());
     acquire(&e1000_lock);
     // full
     if((tx_ring[regs[E1000_TDT]].status&E1000_TXD_STAT_DD)==0) {
@@ -131,6 +127,7 @@ e1000_recv(void) {
     // Check for packets that have arrived from the e1000
     // Create and deliver an mbuf for each packet (using net_rx()).
     //
+//    printf("[e1000_recv]kernel cpu id=%d\n",cpuid());
     for(;;) {
         acquire(&e1000_lock);
 

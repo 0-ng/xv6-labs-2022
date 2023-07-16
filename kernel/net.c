@@ -14,7 +14,10 @@
 static uint32 local_ip = MAKE_IP_ADDR(10, 0, 2, 15); // qemu's idea of the guest IP
 static uint8 local_mac[ETHADDR_LEN] = {0x52, 0x54, 0x00, 0x12, 0x34, 0x56};
 static uint8 broadcast_mac[ETHADDR_LEN] = {0xFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF};
+struct arp_cache arp_cache_list[ARP_CACHE_SIZE];
+struct spinlock arp_lock;
 
+static int net_tx_arp(uint16 op, uint8 dmac[ETHADDR_LEN], uint32 dip);
 // Strips data from the start of the buffer and returns a pointer to it.
 // Returns 0 if less than the full requested length is available.
 char *
@@ -150,7 +153,7 @@ in_cksum(const unsigned char *addr, int len) {
 
 // sends an ethernet packet
 static void
-net_tx_eth(struct mbuf *m, uint16 ethtype) {
+net_tx_eth(struct mbuf *m, uint16 ethtype, uint32 dip) {
     struct eth *ethhdr;
 
     ethhdr = mbufpushhdr(m, *ethhdr);
@@ -158,18 +161,28 @@ net_tx_eth(struct mbuf *m, uint16 ethtype) {
     // In a real networking stack, dhost would be set to the address discovered
     // through ARP. Because we don't support enough of the ARP protocol, set it
     // to broadcast instead.
+//    memmove(ethhdr->dhost, broadcast_mac, ETHADDR_LEN);
     switch (ethtype) {
-//        case ETHTYPE_IP:
-//            if(hitCache()){
-//
-//            }
-//            uint8 dip[ETHADDR_LEN] = broadcast_mac;
-//            break;
-//        case ETHTYPE_ARP:
-//            memmove(ethhdr->dhost, broadcast_mac, ETHADDR_LEN);
-//            break;
+        case ETHTYPE_ARP:
+            memmove(ethhdr->dhost, broadcast_mac, ETHADDR_LEN);
+            break;
         default:
             memmove(ethhdr->dhost, broadcast_mac, ETHADDR_LEN);
+            break;
+            // TODO 8.8.8.8 not work why?
+            acquire(&arp_lock);
+            if(!arp_cache_list[dip%ARP_CACHE_SIZE].flag){
+                if(net_tx_arp(ARP_OP_REQUEST, broadcast_mac, dip)!=-1){
+                    while (!arp_cache_list[dip%ARP_CACHE_SIZE].flag) {
+                        printf("wait 1\n");
+                        sleep(&arp_cache_list[dip%ARP_CACHE_SIZE], &arp_lock);
+                    }
+                    memmove(ethhdr->dhost, arp_cache_list[dip%ARP_CACHE_SIZE].ha, ETHADDR_LEN);
+                }
+            }else{
+                memmove(ethhdr->dhost, arp_cache_list[dip%ARP_CACHE_SIZE].ha, ETHADDR_LEN);
+            }
+            release(&arp_lock);
     }
     ethhdr->type = htons(ethtype);
     if (e1000_transmit(m)) {
@@ -194,7 +207,7 @@ net_tx_ip(struct mbuf *m, uint8 proto, uint32 dip) {
     iphdr->ip_sum = in_cksum((unsigned char *) iphdr, sizeof(*iphdr));
 
     // now on to the ethernet layer
-    net_tx_eth(m, ETHTYPE_IP);
+    net_tx_eth(m, ETHTYPE_IP, dip);
 }
 
 // sends a UDP packet
@@ -239,7 +252,7 @@ net_tx_arp(uint16 op, uint8 dmac[ETHADDR_LEN], uint32 dip) {
     arphdr->tip = htonl(dip);
 
     // header is ready, send the packet
-    net_tx_eth(m, ETHTYPE_ARP);
+    net_tx_eth(m, ETHTYPE_ARP, dip);
     return 0;
 }
 
@@ -265,13 +278,24 @@ net_rx_arp(struct mbuf *m) {
     // only requests are supported so far
     // check if our IP was solicited
     tip = ntohl(arphdr->tip); // target IP address
-    if (ntohs(arphdr->op) != ARP_OP_REQUEST || tip != local_ip)
-        goto done;
-
-    // handle the ARP request
-    memmove(smac, arphdr->sha, ETHADDR_LEN); // sender's ethernet address
+//    if (ntohs(arphdr->op) != ARP_OP_REQUEST || tip != local_ip)
+//        goto done;
     sip = ntohl(arphdr->sip); // sender's IP address (qemu's slirp)
-    net_tx_arp(ARP_OP_REPLY, smac, sip);
+    memmove(smac, arphdr->sha, ETHADDR_LEN); // sender's ethernet address
+    switch (ntohs(arphdr->op)) {
+        case ARP_OP_REQUEST:
+            if(tip != local_ip)goto done;
+            // handle the ARP request
+            net_tx_arp(ARP_OP_REPLY, smac, sip);
+            break;
+        case ARP_OP_REPLY:
+            arp_cache_list[sip%ARP_CACHE_SIZE].ip=sip;
+            memmove(arp_cache_list[sip%ARP_CACHE_SIZE].ha, smac, ETHADDR_LEN);
+            arp_cache_list[sip%ARP_CACHE_SIZE].flag=1;
+            wakeup(&arp_cache_list[sip%ARP_CACHE_SIZE]);
+            break;
+    }
+
 
     done:
     mbuffree(m);
