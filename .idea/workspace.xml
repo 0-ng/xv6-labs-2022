@@ -14,8 +14,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d1963fa3-e58d-49a5-8ca5-35dad8a0db43" name="Changes" comment="arp">
       <change beforePath="$PROJECT_DIR$/kernel/e1000.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/e1000.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/main.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/param.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/param.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/pci.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/pci.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/vm.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/vm.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/packets.pcap" beforeDir="false" afterPath="$PROJECT_DIR$/packets.pcap" afterDir="false" />
@@ -113,7 +111,7 @@
       <workItem from="1689424820502" duration="6393000" />
       <workItem from="1689515779388" duration="7831000" />
       <workItem from="1689599774919" duration="10790000" />
-      <workItem from="1689777908415" duration="2360000" />
+      <workItem from="1689777908415" duration="2695000" />
     </task>
     <task id="LOCAL-00001" summary="refactor">
       <option name="closed" value="true" />

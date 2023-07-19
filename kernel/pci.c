@@ -67,11 +67,7 @@ pci_init() {
     // we'll place the e1000 registers at this address.
     // vm.c maps this range.
 //  uint64 e1000_regs = 0x40000000L;
-    printf("[pci_init]%d\n", cpuid());
-    uint64 e1000_regs = 0x40000000L + 0x40000 * cpuid();
-    ((uint32 *) e1000_regs)[E1000_RDH] = 0;
-    printf("cpuid()=%d E1000_RDH=%d E1000_RDT=%d\n", cpuid(), ((uint32 *) e1000_regs)[E1000_RDH],
-           ((uint32 *) e1000_regs)[E1000_RDT]);
+    uint64 e1000_regs = 0x40000000L;
 
     // qemu -machine virt puts PCIe config space here.
     // vm.c maps this range.
@@ -102,12 +98,9 @@ pci_init() {
                 // writing all 1's to the BAR causes it to be
                 // replaced with its size.
                 base[4 + i] = 0xffffffff;
-                printf("bef base 4+%d=%p\n", i, base[4 + i]);
                 __sync_synchronize();
-                printf("aft base 4+%d=%p\n", i, base[4 + i]);
 
                 base[4 + i] = old;
-                printf("aaaft base 4+%d=%p\n", i, base[4 + i]);
             }
             // tell the e1000 to reveal its registers at
             // physical address 0x40000000.

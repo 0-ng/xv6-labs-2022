@@ -37,8 +37,7 @@ kvmmake(void)
   kvmmap(kpgtbl, 0x30000000L, 0x30000000L, 0x10000000, PTE_R | PTE_W);
 
   // pci.c maps the e1000's registers here.
-//  kvmmap(kpgtbl, 0x40000000L, 0x40000000L, 0x20000, PTE_R | PTE_W);
-  kvmmap(kpgtbl, 0x40000000L, 0x40000000L, 0x40000*NCPU, PTE_R | PTE_W);
+  kvmmap(kpgtbl, 0x40000000L, 0x40000000L, 0x20000, PTE_R | PTE_W);
 #endif
 
   // PLIC
