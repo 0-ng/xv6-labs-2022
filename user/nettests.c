@@ -33,15 +33,15 @@ ping(uint16 sport, uint16 dport, int attempts) {
     }
 
     char ibuf[128];
-    int cc = read(fd, ibuf, sizeof(ibuf) - 1);
-    if (cc < 0) {
-        fprintf(2, "ping: recv() failed\n");
-        exit(1);
+    int cc;
+    while((cc=read(fd, ibuf, sizeof(ibuf) - 1))!=0){
+        if (cc < 0) {
+            fprintf(2, "ping: recv() failed\n");
+            exit(1);
+        }
+        ibuf[cc]=0;
     }
-
     close(fd);
-    ibuf[cc] = '\0';
-//    printf("%s\n",ibuf);
     if (strcmp(ibuf, "this is the host!") != 0) {
         fprintf(2, "ping didn't receive correct payload\n");
         exit(1);
@@ -256,6 +256,11 @@ main(int argc, char *argv[]) {
     int i, ret;
     uint16 dport = NET_TESTS_PORT;
 
+    printf("testing DNS\n");
+    dns();
+    printf("DNS OK\n");
+//    return 0;
+
     printf("nettests running on port %d\n", dport);
 
     printf("testing ping: ");
@@ -289,3 +294,10 @@ main(int argc, char *argv[]) {
     printf("all tests passed.\n");
     exit(0);
 }
+/* udp
+15:30:15.063700 IP 0ng-machine.39297 > dns.google.domain: 6828+ A? pdos.csail.mit.edu. (36)
+15:30:15.111098 IP dns.google.domain > 0ng-machine.39297: 6828 1/0/0 A 128.52.129.126 (52)
+15:30:27.750866 IP 0ng-machine.35371 > 192.168.1.1.domain: 39779+ AAAA? connectivity-check.ubuntu.com. (47)
+15:30:27.760833 IP 192.168.1.1.domain > 0ng-machine.35371: 39779 6/3/6 AAAA 2620:2d:4000:1::23, AAAA 2620:2d:4000:1::2b, AAAA 2620:2d:4000:1::2a, AAAA 2620:2d:4000:1::22, AAAA 2001:67c:1562::23, AAAA 2001:67c:1562::24 (399)
+
+ */

@@ -120,6 +120,13 @@ struct udp {
     uint16 sum;   // checksum
 };
 
+// a ICMP packet header (comes after an IP header).
+struct icmp {
+    uint8 type; // 类型 type：占 1 个字节，表示较大范围类型分类的 ICMP 报文
+    uint8 code; // 代码 code：占 1 个字节，表示较小范围类型分类的 ICMP 报文(type的细分)
+    uint16 checksum;   // checksum
+};
+
 // an ARP packet (comes after an Ethernet header).
 struct arp {
     uint16 hrd; // format of hardware address
@@ -186,3 +193,4 @@ struct dns_data {
     uint32 ttl;
     uint16 len;
 } __attribute__((packed));
+

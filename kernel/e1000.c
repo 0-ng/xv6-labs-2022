@@ -127,7 +127,6 @@ e1000_recv(void) {
     // Check for packets that have arrived from the e1000
     // Create and deliver an mbuf for each packet (using net_rx()).
     //
-//    printf("[e1000_recv]kernel cpu id=%d\n",cpuid());
     for(;;) {
         acquire(&e1000_lock);
 
@@ -136,6 +135,7 @@ e1000_recv(void) {
             release(&e1000_lock);
             break;
         }
+        printf("[e1000_recv]kernel cpu id=%d\n",cpuid());
         struct mbuf *m=rx_mbufs[nx];
         mbufput(m, rx_ring[nx].length);
 

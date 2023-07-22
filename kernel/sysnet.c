@@ -122,13 +122,20 @@ sockread(struct sock *si, uint64 addr, int n) {
     release(&si->lock);
 
     len = m->len;
-    if (len > n)
+    if (len > n){
         len = n;
+    }else if(len==0){
+        mbuffree(m);
+        return 0;
+    }
     if (copyout(pr->pagetable, addr, m->head, len) == -1) {
         mbuffree(m);
         return -1;
     }
-    mbuffree(m);
+    m->len-=len;
+    acquire(&si->lock);
+    mbufq_pushtail(&si->rxq, m);
+    release(&si->lock);
     return len;
 }
 

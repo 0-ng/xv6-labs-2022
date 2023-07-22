@@ -316,6 +316,9 @@ SERVERPORT = $(shell expr `id -u` % 5000 + 25099)
 server:
 	python3 server.py $(SERVERPORT)
 
+server_tcp:
+	python3 server_tcp.py $(SERVERPORT)
+
 ping:
 	python3 ping.py $(FWDPORT)
 endif

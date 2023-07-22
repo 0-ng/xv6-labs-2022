@@ -14,10 +14,75 @@
 static uint32 local_ip = MAKE_IP_ADDR(10, 0, 2, 15); // qemu's idea of the guest IP
 static uint8 local_mac[ETHADDR_LEN] = {0x52, 0x54, 0x00, 0x12, 0x34, 0x56};
 static uint8 broadcast_mac[ETHADDR_LEN] = {0xFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF};
+static char icmp_type_result[132][16][256] = {
+        {"回显应答(ping应答)"}, {}, {},
+        {
+
+                "网络不可达，也可能是由于网络超过了所用路由选择协议的最大距离限制而认为太远。",
+                "主机不可达",
+                "协议不可达，即数据报中指定的高层协议不可用",
+                "端口不可达，一般指数据报要交付的应用程序未运行",
+                "需要分段但DF置位致使数据报无法分段",
+                "源路由失败",
+                "信宿网络未知",
+                "信宿主机未知",
+                "源主机被隔离（已弃用）",
+                "与信宿网络的通信被禁止",
+                "与信宿主机的通信被禁止",
+                "对特定的服务类型ToS网络不可达，由于得不到指定的服务类型而不能访问信宿网络",
+                "对特定的服务类型ToS主机不可达，由于得不到指定的服务类型而不能访问信宿主机",
+                "因管理者设置过滤而使主机不可达（对主机的访问被禁止）",
+                "因非法的优先级而使主机不可达，所请求的优先级对该主机是不允许的",
+                "因报文的优先级低于网络设置的最小优先级而使主机不可达",
+        },
+        {
+                "源端被关闭（基本流控制）",
+        },
+        {
+                "重定向:对网络重定向",
+                "对主机重定向",
+                "对服务类型和网络重定向",
+                "对服务类型和主机重定向",
+        }, {}, {},
+        {
+                "请求回显（P i n g请求）"
+        },
+        {
+                "路由器通告"
+        },
+        {"路由器请求"},
+        {
+                "传输期间生存时间为0（Traceroute）",
+                "在数据报组装期间生存时间为0"
+        },
+        {
+                "坏的I P首部（包括各种差错）",
+                "缺少必需的选项"
+        },
+        {
+                "时间戳请求"
+        },
+        {
+                "时间戳应答"
+        },
+        {
+                "信息请求（作废不用）"
+        },
+        {
+                "信息应答（作废不用）"
+        },
+        {
+                "地址掩码请求"
+        },
+        {
+                "地址掩码应答"
+        }
+};
 struct arp_cache arp_cache_list[ARP_CACHE_SIZE];
 struct spinlock arp_lock;
 
 static int net_tx_arp(uint16 op, uint8 dmac[ETHADDR_LEN], uint32 dip);
+
 // Strips data from the start of the buffer and returns a pointer to it.
 // Returns 0 if less than the full requested length is available.
 char *
@@ -171,16 +236,16 @@ net_tx_eth(struct mbuf *m, uint16 ethtype, uint32 dip) {
             break;
             // TODO 8.8.8.8 not work why?
             acquire(&arp_lock);
-            if(!arp_cache_list[dip%ARP_CACHE_SIZE].flag){
-                if(net_tx_arp(ARP_OP_REQUEST, broadcast_mac, dip)!=-1){
-                    while (!arp_cache_list[dip%ARP_CACHE_SIZE].flag) {
+            if (!arp_cache_list[dip % ARP_CACHE_SIZE].flag) {
+                if (net_tx_arp(ARP_OP_REQUEST, broadcast_mac, dip) != -1) {
+                    while (!arp_cache_list[dip % ARP_CACHE_SIZE].flag) {
                         printf("wait 1\n");
-                        sleep(&arp_cache_list[dip%ARP_CACHE_SIZE], &arp_lock);
+                        sleep(&arp_cache_list[dip % ARP_CACHE_SIZE], &arp_lock);
                     }
-                    memmove(ethhdr->dhost, arp_cache_list[dip%ARP_CACHE_SIZE].ha, ETHADDR_LEN);
+                    memmove(ethhdr->dhost, arp_cache_list[dip % ARP_CACHE_SIZE].ha, ETHADDR_LEN);
                 }
-            }else{
-                memmove(ethhdr->dhost, arp_cache_list[dip%ARP_CACHE_SIZE].ha, ETHADDR_LEN);
+            } else {
+                memmove(ethhdr->dhost, arp_cache_list[dip % ARP_CACHE_SIZE].ha, ETHADDR_LEN);
             }
             release(&arp_lock);
     }
@@ -204,6 +269,7 @@ net_tx_ip(struct mbuf *m, uint8 proto, uint32 dip) {
     iphdr->ip_dst = htonl(dip);
     iphdr->ip_len = htons(m->len);
     iphdr->ip_ttl = 100;
+//    iphdr->ip_ttl = 1;
     iphdr->ip_sum = in_cksum((unsigned char *) iphdr, sizeof(*iphdr));
 
     // now on to the ethernet layer
@@ -284,15 +350,17 @@ net_rx_arp(struct mbuf *m) {
     memmove(smac, arphdr->sha, ETHADDR_LEN); // sender's ethernet address
     switch (ntohs(arphdr->op)) {
         case ARP_OP_REQUEST:
-            if(tip != local_ip)goto done;
+            if (tip != local_ip)goto done;
             // handle the ARP request
             net_tx_arp(ARP_OP_REPLY, smac, sip);
             break;
         case ARP_OP_REPLY:
-            arp_cache_list[sip%ARP_CACHE_SIZE].ip=sip;
-            memmove(arp_cache_list[sip%ARP_CACHE_SIZE].ha, smac, ETHADDR_LEN);
-            arp_cache_list[sip%ARP_CACHE_SIZE].flag=1;
-            wakeup(&arp_cache_list[sip%ARP_CACHE_SIZE]);
+            arp_cache_list[sip % ARP_CACHE_SIZE].ip = sip;
+            memmove(arp_cache_list[sip % ARP_CACHE_SIZE].ha, smac, ETHADDR_LEN);
+            arp_cache_list[sip % ARP_CACHE_SIZE].flag = 1;
+            acquire(&arp_lock);
+            wakeup(&arp_cache_list[sip % ARP_CACHE_SIZE]);
+            release(&arp_lock);
             break;
     }
 
@@ -335,6 +403,32 @@ net_rx_udp(struct mbuf *m, uint16 len, struct ip *iphdr) {
     mbuffree(m);
 }
 
+
+// receives a ICMP packet
+static void
+net_rx_icmp(struct mbuf *m, uint16 len, struct ip *iphdr) {
+    struct icmp *icmphdr;
+
+
+    icmphdr = mbufpullhdr(m, *icmphdr);
+    if (!icmphdr)
+        goto fail;
+
+    // validate lengths reported in headers
+    len -= sizeof(*icmphdr);
+    if (len > m->len)
+        goto fail;
+    // minimum packet size could be larger than the payload
+    mbuftrim(m, m->len - len);
+
+    // parse the necessary fields
+    printf("[net_rx_icmp]%s\n", icmp_type_result[icmphdr->type][icmphdr->code]);
+    return;
+
+    fail:
+    mbuffree(m);
+}
+
 // receives an IP packet
 static void
 net_rx_ip(struct mbuf *m) {
@@ -362,11 +456,20 @@ net_rx_ip(struct mbuf *m) {
     if (htonl(iphdr->ip_dst) != local_ip)
         goto fail;
     // can only support UDP
-    if (iphdr->ip_p != IPPROTO_UDP)
-        goto fail;
-
-    len = ntohs(iphdr->ip_len) - sizeof(*iphdr);
-    net_rx_udp(m, len, iphdr);
+    switch (iphdr->ip_p) {
+        case IPPROTO_UDP:
+            len = ntohs(iphdr->ip_len) - sizeof(*iphdr);
+            net_rx_udp(m, len, iphdr);
+            break;
+        case IPPROTO_ICMP:
+            len = ntohs(iphdr->ip_len) - sizeof(*iphdr);
+            net_rx_icmp(m, len, iphdr);
+            break;
+        case IPPROTO_TCP:
+        default:
+            printf("[net_rx_ip]receive ip protocol %d\n", iphdr->ip_p);
+            goto fail;
+    }
     return;
 
     fail:
