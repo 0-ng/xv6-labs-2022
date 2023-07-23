@@ -31,3 +31,7 @@
 #define SYS_munmap    28
 #define SYS_connect   29
 #define SYS_pgaccess  30
+#define SYS_socket   31
+#define SYS_bind  32
+#define SYS_recvfrom   33
+#define SYS_sendto  34

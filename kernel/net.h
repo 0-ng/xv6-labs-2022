@@ -194,3 +194,8 @@ struct dns_data {
     uint16 len;
 } __attribute__((packed));
 
+struct server_data {
+    uint32 raddr;
+    uint16 rport;
+} __attribute__((packed));
+

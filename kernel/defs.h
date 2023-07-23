@@ -237,6 +237,11 @@ void            sockclose(struct sock *);
 int             sockread(struct sock *, uint64, int);
 int             sockwrite(struct sock *, uint64, int);
 void            sockrecvudp(struct mbuf*, uint32, uint16, uint16);
+int socket(struct file **f);
+int bind(int fd, uint32 laddr, uint16 lport);
+int recvfrom(struct sock *si, uint64 addr, int n, uint64 raddr, uint64 rport);
+void sendto(struct sock *si, uint64 addr, int n, uint32 raddr, uint16 rport);
+
 #endif
 
 //#define DEBUG 0

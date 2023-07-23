@@ -24,6 +24,10 @@ int sleep(int);
 int uptime(void);
 #ifdef LAB_NET
 int connect(uint32, uint16, uint16);
+int socket(uint32,uint32,uint32);
+int bind(int, uint32, uint16);
+int recvfrom(int, char* addr, int n, uint32* raddr, uint16 *rport);
+void sendto(int, char* addr, int n, uint32 raddr, uint16 rport);
 #endif
 #ifdef LAB_PGTBL
 int pgaccess(void *base, int len, void *mask);

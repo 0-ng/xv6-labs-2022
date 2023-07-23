@@ -38,3 +38,7 @@ entry("sleep");
 entry("uptime");
 entry("connect");
 entry("pgaccess");
+entry("socket");
+entry("bind");
+entry("recvfrom");
+entry("sendto");

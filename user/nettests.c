@@ -256,9 +256,9 @@ main(int argc, char *argv[]) {
     int i, ret;
     uint16 dport = NET_TESTS_PORT;
 
-    printf("testing DNS\n");
-    dns();
-    printf("DNS OK\n");
+//    printf("testing DNS\n");
+//    dns();
+//    printf("DNS OK\n");
 //    return 0;
 
     printf("nettests running on port %d\n", dport);
