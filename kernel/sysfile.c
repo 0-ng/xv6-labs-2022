@@ -588,6 +588,37 @@ sys_sendto(void){
   argint(4, (int*)&rport);
   sendto(f->sock,obuf,len,raddr,rport);
 }
+
+
+void
+sys_tcp_connect(void)
+{
+  struct file *f;
+  uint32 raddr;
+  uint16 rport;
+
+  if(argfd(0, 0, &f) < 0)
+    return;
+  argint(1, (int*)&raddr);
+  argint(2, (int*)&rport);
+  tcp_connect(f->sock, raddr, rport);
+}
+
+void
+sys_sendall(void)
+{
+  struct file *f;
+  uint64 obuf;
+  uint32 len;
+
+  if(argfd(0, 0, &f) < 0)
+    return;
+  argaddr(1, &obuf);
+  argint(2, (int*)&len);
+  printf("[sys_sendall]len=%d\n",len);
+  sendall(f->sock,obuf,len);
+}
+
 //void sendto(int, char* addr, int n, uint32 raddr, uint16 rport){
 
 //while((cc=recvfrom(server_fd, &raddr,&rport,ibuf,sizeof(ibuf) - 1))!=0){

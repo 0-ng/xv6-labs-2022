@@ -35,3 +35,5 @@
 #define SYS_bind  32
 #define SYS_recvfrom   33
 #define SYS_sendto  34
+#define SYS_tcp_connect   35
+#define SYS_sendall  36

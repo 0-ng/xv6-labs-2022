@@ -42,3 +42,5 @@ entry("socket");
 entry("bind");
 entry("recvfrom");
 entry("sendto");
+entry("tcp_connect");
+entry("sendall");

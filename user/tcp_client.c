@@ -54,25 +54,10 @@
 
 int
 main(int argc, char *argv[]) {
-//    echo "hello" | socat - udp4-datagram:localhost:26999
-    int server_fd = socket(127 << 24 | 0 << 16 | 0 << 8 | 1, 2, 0);
-    int ret = bind(server_fd, 127 << 24 | 0 << 16 | 0 << 8 | 1, 2000);
-    if (ret < 0) {
-        printf("socket bind fail!\n");
-        return -1;
-    }
-    uint32 raddr;
-    uint16 rport;
-    int cc;
-    char *obuf = "a message from server!";
-    char ibuf[128];
-    printf("socket begin to receive\n");
-    while ((cc = recvfrom(server_fd, ibuf, sizeof(ibuf) - 1, &raddr, &rport)) != 0) {
-        ibuf[cc] = 0;
-        printf("receive from raddr=%d, rport=%d, content=%s", raddr, rport, ibuf);
-        sendto(server_fd, obuf, strlen(obuf), raddr, rport);
-    }
-
-    close(server_fd);
+    int client_fd = socket(127 << 24 | 0 << 16 | 0 << 8 | 1, SOCK_STREAM, 0);
+    tcp_connect(client_fd, 127 << 24 | 0 << 16 | 0 << 8 | 1, 65432);
+    char *obuf="from tcp client!";
+    sendall(client_fd, obuf, strlen(obuf));
+    close(client_fd);
     exit(0);
 }

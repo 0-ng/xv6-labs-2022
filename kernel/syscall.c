@@ -108,6 +108,9 @@ extern uint64 sys_socket(void);
 extern uint64 sys_bind(void);
 extern uint64 sys_recvfrom(void);
 extern uint64 sys_sendto(void);
+extern uint64 sys_tcp_connect(void);
+extern uint64 sys_sendall(void);
+
 #endif
 #ifdef LAB_PGTBL
 extern uint64 sys_pgaccess(void);
@@ -143,6 +146,9 @@ static uint64 (*syscalls[])(void) = {
 [SYS_bind] sys_bind,
 [SYS_recvfrom] sys_recvfrom,
 [SYS_sendto] sys_sendto,
+[SYS_tcp_connect] sys_tcp_connect,
+[SYS_sendall] sys_sendall,
+
 #endif
 #ifdef LAB_PGTBL
 [SYS_pgaccess] sys_pgaccess,

@@ -42,7 +42,7 @@ socket(struct file **f, uint8 type) {
         goto bad;
     if ((si = (struct sock *) kalloc()) == 0)
         goto bad;
-    si->type=type;
+    si->type = type;
     // initialize objects
     initlock(&si->lock, "sock");
     mbufq_init(&si->rxq);
@@ -155,6 +155,8 @@ void sendto(struct sock *si, uint64 addr, int n, uint32 raddr, uint16 rport) {
 
     switch (si->type) {
         case SOCK_DGRAM:
+            printf("[sendto]lport=%d\n",si->lport);
+            // TODO random lport?
             net_tx_udp(m, raddr, si->lport, rport);
             break;
         case SOCK_STREAM:
@@ -338,4 +340,14 @@ sockrecvudp(struct mbuf *m, uint32 raddr, uint16 lport, uint16 rport) {
     wakeup(&si->rxq);
     release(&si->lock);
     release(&lock);
+}
+
+
+void tcp_connect(struct sock *si, uint32 raddr, uint16 rport){
+    printf("[tcp_connect]\n");
+}
+
+void sendall(struct sock *si, uint64 addr, int n){
+    printf("[sendall]\n");
+
 }
