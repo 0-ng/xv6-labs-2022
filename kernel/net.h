@@ -117,6 +117,26 @@ struct ip {
 #define SOCK_DGRAM 2  // udp
 
 
+// a TCP packet header (comes after an IP header).
+struct tcp {
+    uint16 sport; // source port
+    uint16 dport; // destination port
+    uint32 sequence_number;  // 发送数据包中的第一个字节的序列号
+    uint32 acknowledgment_number;   // 确认序列号
+    uint16 data_offset:4;   // 数据偏移，4位，该字段的值是TCP首部（包括选项）长度除以4
+    uint16 reserved:6;   //
+    uint16 flag:6;   // 标志位
+//    URG表示Urgent Pointer字段有意义：
+//    ACK表示Acknowledgment Number字段有意义
+//    PSH表示Push功能
+//    RST表示复位TCP连接
+//    SYN表示SYN报文（在建立TCP连接的时候使用）
+//    FIN表示没有数据需要发送了（在关闭TCP连接的时候使用）
+    uint16 window;   // 表示接收缓冲区的空闲空间，16位，用来告诉TCP连接对端自己能够接收的最大数据长度。
+    uint16 checksum;   // 校验和
+    uint16 urgent_pointers;   // 紧急指针
+};
+
 // a UDP packet header (comes after an IP header).
 struct udp {
     uint16 sport; // source port

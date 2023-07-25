@@ -276,6 +276,23 @@ net_tx_ip(struct mbuf *m, uint8 proto, uint32 dip) {
     net_tx_eth(m, ETHTYPE_IP, dip);
 }
 
+// sends a TCP packet
+void
+net_tx_tcp(struct mbuf *m, uint32 dip,
+           uint16 sport, uint16 dport) {
+    struct tcp *tcphdr;
+
+    // put the UDP header
+    tcphdr = mbufpushhdr(m, *tcphdr);
+    tcphdr->sport = htons(sport);
+    tcphdr->dport = htons(dport);
+    // TODO
+//    udphdr->ulen = htons(m->len);
+//    udphdr->sum = 0; // zero means no checksum is provided
+//
+//    // now on to the IP layer
+//    net_tx_ip(m, IPPROTO_UDP, dip);
+}
 // sends a UDP packet
 void
 net_tx_udp(struct mbuf *m, uint32 dip,

@@ -43,7 +43,8 @@ socket(struct file **f, uint8 type) {
     if ((si = (struct sock *) kalloc()) == 0)
         goto bad;
     si->type = type;
-    // initialize objects
+    si->lport = 10086;
+// initialize objects
     initlock(&si->lock, "sock");
     mbufq_init(&si->rxq);
     (*f)->type = FD_SOCK;
@@ -345,6 +346,17 @@ sockrecvudp(struct mbuf *m, uint32 raddr, uint16 lport, uint16 rport) {
 
 void tcp_connect(struct sock *si, uint32 raddr, uint16 rport){
     printf("[tcp_connect]\n");
+    struct mbuf *m;
+
+    m = mbufalloc(MBUF_DEFAULT_HEADROOM);
+    if (!m)
+        return;
+
+    si->raddr=raddr;
+    si->rport=rport;
+    Dprintf("[tcp_connect]raddr=%d, rport=%d", si->raddr, si->rport, si->lport);
+
+//    net_tx_tcp(m, si->raddr, si->lport, si->rport);
 }
 
 void sendall(struct sock *si, uint64 addr, int n){
