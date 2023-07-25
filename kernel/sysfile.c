@@ -519,14 +519,14 @@ sys_socket(void)
   struct file *f;
   int fd;
 //  uint32 domain;
-//  uint32 type; // udp/tcp
+  uint8 type; // udp/tcp
 //  uint32 protocol; // ipv4/ipv6
 //
 //  argint(0, (int*)&domain);
-//  argint(1, (int*)&type);
+  argint(1, (int*)&type);
 //  argint(2, (int*)&protocol);
 
-  if(socket(&f) < 0)
+  if(socket(&f,type) < 0)
     return -1;
   if((fd=fdalloc(f)) < 0){
     fileclose(f);

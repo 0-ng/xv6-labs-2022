@@ -112,6 +112,11 @@ struct ip {
   (((uint32)a << 24) | ((uint32)b << 16) | \
    ((uint32)c << 8) | (uint32)d)
 
+
+#define SOCK_STREAM 1  // tcp
+#define SOCK_DGRAM 2  // udp
+
+
 // a UDP packet header (comes after an IP header).
 struct udp {
     uint16 sport; // source port

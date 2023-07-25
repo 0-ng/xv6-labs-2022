@@ -19,6 +19,7 @@ struct sock {
     uint32 raddr;      // the remote IPv4 address
     uint16 lport;      // the local UDP port number
     uint16 rport;      // the remote UDP port number
+    uint8 type;      // tcp 1; udp 2
     struct spinlock lock; // protects the rxq
     struct mbufq rxq;  // a queue of packets waiting to be received
 };
@@ -32,7 +33,7 @@ sockinit(void) {
 }
 
 int
-socket(struct file **f) {
+socket(struct file **f, uint8 type) {
     struct sock *si;
 //
 //    si = 0;
@@ -41,7 +42,7 @@ socket(struct file **f) {
         goto bad;
     if ((si = (struct sock *) kalloc()) == 0)
         goto bad;
-
+    si->type=type;
     // initialize objects
     initlock(&si->lock, "sock");
     mbufq_init(&si->rxq);
@@ -62,12 +63,12 @@ socket(struct file **f) {
 }
 
 int
-bind(int fd, uint32 laddr, uint16 lport){
+bind(int fd, uint32 laddr, uint16 lport) {
     struct sock *pos;
-    struct proc *p=myproc();
-    struct file **f=&p->ofile[fd];
-    if(*f==0)return -1;
-    struct sock *si=(*f)->sock;
+    struct proc *p = myproc();
+    struct file **f = &p->ofile[fd];
+    if (*f == 0)return -1;
+    struct sock *si = (*f)->sock;
     si->raddr = 0xffffffff;
     si->lport = lport;
     si->rport = 0xffff;
@@ -120,18 +121,18 @@ recvfrom(struct sock *si, uint64 addr, int n, uint64 raddr, uint64 rport) {
     release(&si->lock);
 
     len = m->len;
-    if (len > n){
+    if (len > n) {
         len = n;
     }
     if (copyout(pr->pagetable, addr, m->head, len) == -1) {
         mbuffree(m);
         return -1;
     }
-    if (copyout(pr->pagetable, raddr, (char *)&server->raddr, sizeof(server->raddr)) == -1) {
+    if (copyout(pr->pagetable, raddr, (char *) &server->raddr, sizeof(server->raddr)) == -1) {
         mbuffree(m);
         return -1;
     }
-    if (copyout(pr->pagetable, rport, (char *)&server->rport, sizeof(server->rport)) == -1) {
+    if (copyout(pr->pagetable, rport, (char *) &server->rport, sizeof(server->rport)) == -1) {
         mbuffree(m);
         return -1;
     }
@@ -139,19 +140,28 @@ recvfrom(struct sock *si, uint64 addr, int n, uint64 raddr, uint64 rport) {
     return len;
 }
 
-void sendto(struct sock *si, uint64 addr, int n, uint32 raddr, uint16 rport){
+void sendto(struct sock *si, uint64 addr, int n, uint32 raddr, uint16 rport) {
     struct proc *pr = myproc();
     struct mbuf *m;
 
     m = mbufalloc(MBUF_DEFAULT_HEADROOM);
     if (!m)
         return;
-    printf("[sendto]send len=%d\n",n);
+    printf("[sendto]send len=%d\n", n);
     if (copyin(pr->pagetable, mbufput(m, n), addr, n) == -1) {
         mbuffree(m);
         return;
     }
-    net_tx_udp(m, raddr, si->lport, rport);
+
+    switch (si->type) {
+        case SOCK_DGRAM:
+            net_tx_udp(m, raddr, si->lport, rport);
+            break;
+        case SOCK_STREAM:
+            break;
+        default:
+            printf("[sendto]unknown type=%d\n", si->type);
+    }
     return;
 }
 
@@ -246,9 +256,9 @@ sockread(struct sock *si, uint64 addr, int n) {
     release(&si->lock);
 
     len = m->len;
-    if (len > n){
+    if (len > n) {
         len = n;
-    }else if(len==0){
+    } else if (len == 0) {
         mbuffree(m);
         return 0;
     }
@@ -256,7 +266,7 @@ sockread(struct sock *si, uint64 addr, int n) {
         mbuffree(m);
         return -1;
     }
-    m->len-=len;
+    m->len -= len;
     acquire(&si->lock);
     mbufq_pushtail(&si->rxq, m);
     release(&si->lock);
