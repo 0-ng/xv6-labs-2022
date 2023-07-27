@@ -195,7 +195,7 @@ devintr()
       virtio_disk_intr();
     }
 #ifdef LAB_NET
-    else if(irq == E1000_IRQ){
+    else if(irq == E1000_IRQ||irq == E1000_IRQ2){
       e1000_intr();
     }
 #endif

@@ -27,6 +27,7 @@
 
 #ifdef LAB_NET
 #define E1000_IRQ 33
+#define E1000_IRQ2 34
 #endif
 
 // core local interruptor (CLINT), which contains the timer.

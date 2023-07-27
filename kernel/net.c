@@ -15,10 +15,12 @@ static uint32 local_ip = MAKE_IP_ADDR(10, 0, 2, 15); // qemu's idea of the guest
 static uint8 local_mac[ETHADDR_LEN] = {0x52, 0x54, 0x00, 0x12, 0x34, 0x56};
 static uint8 broadcast_mac[ETHADDR_LEN] = {0xFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF};
 static char icmp_type_result[132][16][256] = {
-        {"回显应答(ping应答)"}, {}, {},
+        {"回显应答(ping应答)"},
+        {},
+        {},
         {
 
-                "网络不可达，也可能是由于网络超过了所用路由选择协议的最大距离限制而认为太远。",
+         "网络不可达，也可能是由于网络超过了所用路由选择协议的最大距离限制而认为太远。",
                 "主机不可达",
                 "协议不可达，即数据报中指定的高层协议不可用",
                 "端口不可达，一般指数据报要交付的应用程序未运行",
@@ -36,46 +38,48 @@ static char icmp_type_result[132][16][256] = {
                 "因报文的优先级低于网络设置的最小优先级而使主机不可达",
         },
         {
-                "源端被关闭（基本流控制）",
+         "源端被关闭（基本流控制）",
         },
         {
-                "重定向:对网络重定向",
+         "重定向:对网络重定向",
                 "对主机重定向",
                 "对服务类型和网络重定向",
                 "对服务类型和主机重定向",
-        }, {}, {},
+        },
+        {},
+        {},
         {
-                "请求回显（P i n g请求）"
+         "请求回显（P i n g请求）"
         },
         {
-                "路由器通告"
+         "路由器通告"
         },
         {"路由器请求"},
         {
-                "传输期间生存时间为0（Traceroute）",
+         "传输期间生存时间为0（Traceroute）",
                 "在数据报组装期间生存时间为0"
         },
         {
-                "坏的I P首部（包括各种差错）",
+         "坏的I P首部（包括各种差错）",
                 "缺少必需的选项"
         },
         {
-                "时间戳请求"
+         "时间戳请求"
         },
         {
-                "时间戳应答"
+         "时间戳应答"
         },
         {
-                "信息请求（作废不用）"
+         "信息请求（作废不用）"
         },
         {
-                "信息应答（作废不用）"
+         "信息应答（作废不用）"
         },
         {
-                "地址掩码请求"
+         "地址掩码请求"
         },
         {
-                "地址掩码应答"
+         "地址掩码应答"
         }
 };
 struct arp_cache arp_cache_list[ARP_CACHE_SIZE];
@@ -185,10 +189,10 @@ mbufq_init(struct mbufq *q) {
 // This code is lifted from FreeBSD's ping.c, and is copyright by the Regents
 // of the University of California.
 static unsigned short
-in_cksum(const unsigned char *addr, int len) {
+in_cksum(const unsigned char *addr, int len, unsigned int presum) {
     int nleft = len;
     const unsigned short *w = (const unsigned short *) addr;
-    unsigned int sum = 0;
+    unsigned int sum = presum;
     unsigned short answer = 0;
 
     /*
@@ -197,14 +201,14 @@ in_cksum(const unsigned char *addr, int len) {
      * carry bits from the top 16 bits into the lower 16 bits.
      */
     while (nleft > 1) {
-        sum += *w++;
+        sum += ntohs(*w++);
         nleft -= 2;
     }
 
     /* mop up an odd byte, if necessary */
     if (nleft == 1) {
         *(unsigned char *) (&answer) = *(const unsigned char *) w;
-        sum += answer;
+        sum += ntohs(answer);
     }
 
     /* add back carry outs from top 16 bits to low 16 bits */
@@ -270,7 +274,7 @@ net_tx_ip(struct mbuf *m, uint8 proto, uint32 dip) {
     iphdr->ip_len = htons(m->len);
     iphdr->ip_ttl = 100;
 //    iphdr->ip_ttl = 1;
-    iphdr->ip_sum = in_cksum((unsigned char *) iphdr, sizeof(*iphdr));
+    iphdr->ip_sum = in_cksum((unsigned char *) iphdr, sizeof(*iphdr),0);
 
     // now on to the ethernet layer
     net_tx_eth(m, ETHTYPE_IP, dip);
@@ -293,6 +297,7 @@ net_tx_tcp(struct mbuf *m, uint32 dip,
 //    // now on to the IP layer
 //    net_tx_ip(m, IPPROTO_UDP, dip);
 }
+
 // sends a UDP packet
 void
 net_tx_udp(struct mbuf *m, uint32 dip,
@@ -370,6 +375,7 @@ net_rx_arp(struct mbuf *m) {
             if (tip != local_ip)goto done;
             // handle the ARP request
             net_tx_arp(ARP_OP_REPLY, smac, sip);
+            printf("[ARP_OP_REQUEST]\n");
             break;
         case ARP_OP_REPLY:
             arp_cache_list[sip % ARP_CACHE_SIZE].ip = sip;
@@ -378,11 +384,76 @@ net_rx_arp(struct mbuf *m) {
             acquire(&arp_lock);
             wakeup(&arp_cache_list[sip % ARP_CACHE_SIZE]);
             release(&arp_lock);
+            printf("[ARP_OP_REPLY]\n");
             break;
     }
 
 
     done:
+    mbuffree(m);
+}
+
+/*
+14:48:09.900916 IP 10.0.2.2.33650 > 10.0.2.15.2001: Flags [S], seq 576001, win 65535, options [mss 1460], length 0
+        0x0000:  [5254 0012 3456 dhost] [5255 0a00 0202 shost] [0800 ETHTYPE_IP] [4500 ip_vhl ip_tos]  RT..4VRU......E.
+        0x0010:  [002c ip_len] [0000 ip_id] [0000 ip_off] [4006 ip_ttl ip_p] [62bc ip_sum] [0a00 0202 sip] 0a00  .,....@.b.......
+        0x0020:  020f [8372 sport] [07d1 dport] [0008 ca01 sequence_number] [0000 0000 acknowledgment_number] [6002 tag]  ...r..........`.
+        0x0030:  [ffff window] [2ac9 checksum] [0000 urgent_pointers] [0204 05b4 option] 0000            ..*.........
+[net_rx_tcp]sip=167772674,sport=33650,dport=2001
+sequence_number=576001,acknowledgment_number=0
+alltag=24578,window=65535,checksum=10953
+urgent_pointers=0
+option=1026 option=46085
+ */
+// receives a TCP packet
+static void
+net_rx_tcp(struct mbuf *m, uint16 len, struct ip *iphdr) {
+    struct tcp *tcphdr;
+    uint32 sip,dip;
+    uint16 sport, dport;
+
+    tcphdr = (struct tcp *)mbufpull(m, len);
+    if (!tcphdr)
+        goto fail;
+
+
+    mbuftrim(m, m->len - len);
+
+    // parse the necessary fields
+    sip = ntohl(iphdr->ip_src);
+    dip = ntohl(iphdr->ip_dst);
+    sport = ntohs(tcphdr->sport);
+    dport = ntohs(tcphdr->dport);
+
+    uint32 acknowledgment_number = ntohl(tcphdr->acknowledgment_number);
+    uint32 sequence_number = ntohl(tcphdr->sequence_number);
+    uint16 checksum = ntohs(tcphdr->checksum);
+
+    uint16 window = ntohs(tcphdr->window);
+    uint16 urgent_pointers = ntohs(tcphdr->urgent_pointers);
+    uint16 alltag = ntohs(tcphdr->alltag);
+
+    printf("[net_rx_tcp]sip=%d,dip=%d\n"
+           "sport=%d,dport=%d\n"
+           "sequence_number=%d,acknowledgment_number=%d\n"
+           "alltag=%d,window=%d,checksum=%d\n"
+           "urgent_pointers=%d\n", sip, dip, sport, dport,
+           sequence_number,acknowledgment_number,
+           alltag,window,checksum,
+           urgent_pointers);
+//    uint16 presum=(sip&0xffff)+((sip>>16)&0xffff)+(dip&0xffff)+((dip>>16)&0xffff);
+//    tcphdr->checksum=0;
+//    presum+=IPPROTO_TCP+len;
+//    uint16 cksum=in_cksum((unsigned char *)tcphdr,len,presum);
+//    if(flag&TCP_FLAG_SYN){
+//        sockrecvtcp(m, sip, dport, sport);
+//    }else if(flag&TCP_FLAG_FIN){
+//
+//    }
+//    sockrecvtcp(m, sip, dport, sport);
+    return;
+
+    fail:
     mbuffree(m);
 }
 
@@ -462,7 +533,7 @@ net_rx_ip(struct mbuf *m) {
         goto fail;
     }
     // validate IP checksum
-    if (in_cksum((unsigned char *) iphdr, sizeof(*iphdr))) {
+    if (in_cksum((unsigned char *) iphdr, sizeof(*iphdr),0)) {
         goto fail;
     }
     // can't support fragmented IP packets
@@ -475,6 +546,7 @@ net_rx_ip(struct mbuf *m) {
     // can only support UDP
     switch (iphdr->ip_p) {
         case IPPROTO_UDP:
+            printf("[net_rx_ip]receive udp\n");
             len = ntohs(iphdr->ip_len) - sizeof(*iphdr);
             net_rx_udp(m, len, iphdr);
             break;
@@ -483,6 +555,10 @@ net_rx_ip(struct mbuf *m) {
             net_rx_icmp(m, len, iphdr);
             break;
         case IPPROTO_TCP:
+            printf("[net_rx_ip]receive tcp\n");
+            len = ntohs(iphdr->ip_len) - sizeof(*iphdr);
+            net_rx_tcp(m, len, iphdr);
+            break;
         default:
             printf("[net_rx_ip]receive ip protocol %d\n", iphdr->ip_p);
             goto fail;

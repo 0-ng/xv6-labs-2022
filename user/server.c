@@ -55,6 +55,7 @@
 int
 main(int argc, char *argv[]) {
 //    echo "hello" | socat - udp4-datagram:localhost:26999
+//    (echo "000F737D61747573" | xxd -r -p ;sleep 1)|nc -u localhost 26999|hexdump -C
     int server_fd = socket(127 << 24 | 0 << 16 | 0 << 8 | 1, 2, 0);
     int ret = bind(server_fd, 127 << 24 | 0 << 16 | 0 << 8 | 1, 2000);
     if (ret < 0) {

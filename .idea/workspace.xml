@@ -14,10 +14,14 @@
   <component name="ChangeListManager">
     <list default="true" id="d1963fa3-e58d-49a5-8ca5-35dad8a0db43" name="Changes" comment="frame">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/memlayout.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/memlayout.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/net.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/net.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel/net.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/net.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sysnet.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sysnet.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packets.pcap" beforeDir="false" afterPath="$PROJECT_DIR$/packets.pcap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/pci.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/pci.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/trap.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/trap.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel/vm.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/vm.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/user/server.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/server.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,6 +128,8 @@
       <workItem from="1689994016447" duration="17596000" />
       <workItem from="1690089856922" duration="9916000" />
       <workItem from="1690295728432" duration="5120000" />
+      <workItem from="1690378184979" duration="7762000" />
+      <workItem from="1690469234099" duration="4933000" />
     </task>
     <task id="LOCAL-00001" summary="refactor">
       <option name="closed" value="true" />
