@@ -100,7 +100,7 @@ e1000_transmit(struct mbuf *m) {
     // the TX descriptor ring so that the e1000 sends it. Stash
     // a pointer so that it can be freed after sending.
     //
-//    printf("[e1000_transmit]kernel cpu id=%d\n",cpuid());
+    printf("[e1000_transmit]kernel cpu id=%d\n",cpuid());
     acquire(&e1000_lock);
     // full
     if((tx_ring[regs[E1000_TDT]].status&E1000_TXD_STAT_DD)==0) {

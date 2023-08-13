@@ -1,5 +1,7 @@
 import socket
 import sys
+import time
+import threading
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 addr = ('localhost', int(sys.argv[1]))
@@ -7,23 +9,16 @@ print('listening on %s port %s' % addr, file=sys.stderr)
 sock.bind(addr)
 
 while True:
-    buf, raddr = sock.recvfrom(4096)
-    print(buf.decode("utf-8"), file=sys.stderr)
-    if buf:
-        print(raddr)
-        sent = sock.sendto(b'this is the host!', raddr)
-        # sent = sock.sendto(b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa'
-        #                    b'aaaaaaaaaa', raddr)
+    sock, addr = s.accept()
+    data = sock.recv(1024)
+    print(data)
+    # sock.close()
+# time.sleep(10)
+
+# while True:
+#     sock, addr = s.accept()
+#     # print("accept: " + str(addr))
+#     t = threading.Thread(target=tcplink, args=(sock, addr))
+#     t.start()
+
+

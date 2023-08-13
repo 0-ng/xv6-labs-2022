@@ -345,6 +345,8 @@ int             e1000_transmit(struct mbuf*);
 void            net_rx(struct mbuf*);
 void            net_tx_udp(struct mbuf*, uint32, uint16, uint16);
 
+void net_tx_tcp(struct mbuf *, uint32, uint16, uint16, uint32, uint32, uint8);
+
 // sysnet.c
 void            sockinit(void);
 int             sockalloc(struct file **, uint32, uint16, uint16);
@@ -359,6 +361,7 @@ int recvfrom(struct sock *si, uint64 addr, int n, uint64 raddr, uint64 rport);
 void sendto(struct sock *si, uint64 addr, int n, uint32 raddr, uint16 rport);
 void tcp_connect(struct sock *si, uint32 raddr, uint16 rport);
 void sendall(struct sock *si, uint64 addr, int n);
+void sockrecvtcp(struct mbuf *m, uint32 raddr, uint16 lport, uint16 rport, uint8 isSYN, uint32 sequence_number, uint32 acknowledgment_number);
 
 #endif
 

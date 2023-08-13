@@ -297,10 +297,11 @@ QEMUOPTS += -drive file=fs.img,if=none,format=raw,id=x0
 QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 ifeq ($(LAB),net)
-#QEMUOPTS += -netdev user,id=net0,hostfwd=udp::$(FWDPORT)-:2000 -object filter-dump,id=net0,netdev=net0,file=packets.pcap
-QEMUOPTS += -netdev user,id=net1,hostfwd=tcp::27000-:2001 -object filter-dump,id=net1,netdev=net1,file=packets.pcap
+QEMUOPTS += -netdev user,id=net0,hostfwd=udp::$(FWDPORT)-:2000,hostfwd=tcp::27000-:2001 -object filter-dump,id=net0,netdev=net0,file=packets.pcap
+#QEMUOPTS += -netdev user,id=net0,hostfwd=tcp::27000-:2001 -object filter-dump,id=net0,netdev=net0,file=packets.pcap
+#QEMUOPTS += -netdev user,id=net0,hostfwd=tcp::$(FWDPORT)-:2000 -object filter-dump,id=net0,netdev=net0,file=packets.pcap
 #QEMUOPTS += -device e1000,netdev=net0,bus=pcie.0
-QEMUOPTS += -device e1000,netdev=net1,bus=pcie.0
+QEMUOPTS += -device e1000,netdev=net0,bus=pcie.0
 endif
 
 qemu: $K/kernel fs.img
@@ -321,7 +322,8 @@ server:
 	python3 server.py $(SERVERPORT)
 
 server_tcp:
-	python3 server_tcp.py $(SERVERPORT)
+	python3 tcp.py s
+	#python3 server_tcp.py $(SERVERPORT)
 
 ping:
 	python3 ping.py $(FWDPORT)

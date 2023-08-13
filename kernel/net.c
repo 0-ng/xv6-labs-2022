@@ -13,6 +13,7 @@
 
 static uint32 local_ip = MAKE_IP_ADDR(10, 0, 2, 15); // qemu's idea of the guest IP
 static uint8 local_mac[ETHADDR_LEN] = {0x52, 0x54, 0x00, 0x12, 0x34, 0x56};
+//static uint8 d_mac[ETHADDR_LEN] = {0x52, 0x55, 0x0a, 0x00, 0x02, 0x02};
 static uint8 broadcast_mac[ETHADDR_LEN] = {0xFF, 0XFF, 0XFF, 0XFF, 0XFF, 0XFF};
 static char icmp_type_result[132][16][256] = {
         {"回显应答(ping应答)"},
@@ -201,14 +202,22 @@ in_cksum(const unsigned char *addr, int len, unsigned int presum) {
      * carry bits from the top 16 bits into the lower 16 bits.
      */
     while (nleft > 1) {
-        sum += ntohs(*w++);
+        if(presum!=0){
+            sum += ntohs(*w++);
+        }else{
+            sum += *w++;
+        }
         nleft -= 2;
     }
 
     /* mop up an odd byte, if necessary */
     if (nleft == 1) {
         *(unsigned char *) (&answer) = *(const unsigned char *) w;
-        sum += ntohs(answer);
+        if(presum!=0){
+            sum += ntohs(answer);
+        }else{
+            sum += answer;
+        }
     }
 
     /* add back carry outs from top 16 bits to low 16 bits */
@@ -236,6 +245,7 @@ net_tx_eth(struct mbuf *m, uint16 ethtype, uint32 dip) {
             memmove(ethhdr->dhost, broadcast_mac, ETHADDR_LEN);
             break;
         default:
+//            memmove(ethhdr->dhost, d_mac, ETHADDR_LEN);
             memmove(ethhdr->dhost, broadcast_mac, ETHADDR_LEN);
             break;
             // TODO 8.8.8.8 not work why?
@@ -280,22 +290,49 @@ net_tx_ip(struct mbuf *m, uint8 proto, uint32 dip) {
     net_tx_eth(m, ETHTYPE_IP, dip);
 }
 
+/*
+05:26:56.064075 IP 10.0.2.15.10086 > 127.0.0.1.65432: Flags [S], seq 10086, win 2048, options [mss 1460], length 0
+        0x0000:  ffff ffff ffff 5254 0012 3456 0800 4500  ......RT..4V..E.
+        0x0010:  002c 0000 0000 6406 bccb 0a00 020f 7f00  .,....d.........
+        0x0020:  0001 2766 ff98 0000 2766 0000 0014 6002  ..'f....'f....`.
+        0x0030:  0800 b69d 0000 0204 05b4                 ..........
+05:28:07.000468 IP 10.0.2.2.44422 > 10.0.2.15.2001: Flags [S], seq 16384001, win 65535, options [mss 1460], length 0
+        0x0000:  5254 0012 3456 5255 0a00 0202 0800 4500  RT..4VRU......E.
+        0x0010:  002c 0001 0000 4006 62bb 0a00 0202 0a00  .,....@.b.......
+        0x0020:  020f ad86 07d1 00fa 0001 0000 0000 6002  ..............`.
+        0x0030:  ffff c9c3 0000 0204 05b4 0000            ............
+ */
 // sends a TCP packet
 void
 net_tx_tcp(struct mbuf *m, uint32 dip,
-           uint16 sport, uint16 dport) {
+           uint16 sport, uint16 dport, uint32 sequence_number, uint32 acknowledgment_number, uint8 flag) {
     struct tcp *tcphdr;
 
-    // put the UDP header
-    tcphdr = mbufpushhdr(m, *tcphdr);
+    // put the TCP header
+//    uint16 len=24;
+    uint16 len=20;
+    tcphdr = (struct tcp *)mbufpush(m, len);
     tcphdr->sport = htons(sport);
     tcphdr->dport = htons(dport);
-    // TODO
-//    udphdr->ulen = htons(m->len);
-//    udphdr->sum = 0; // zero means no checksum is provided
+    tcphdr->sequence_number = htonl(sequence_number);
+    tcphdr->acknowledgment_number = htonl(acknowledgment_number);
+    tcphdr->data_offset=sizeof(struct tcp)/4;
+    if(flag&TCP_FLAG_FIN)tcphdr->fin=1;
+    if(flag&TCP_FLAG_SYN)tcphdr->syn=1;
+    if(flag&TCP_FLAG_ACK)tcphdr->ack=1;
+    if(flag&TCP_FLAG_PSH)tcphdr->psh=1;
+//    tcphdr->alltag = htons((len>>2)<<12|flag);
+    tcphdr->window = htons(65535);
+    tcphdr->urgent_pointers = htons(0);
+//    tcphdr->option[0] = htons(0x0204);
+//    tcphdr->option[1] = htons(0x05b4);
+    uint16 presum=(local_ip&0xffff)+((local_ip>>16)&0xffff)+(dip&0xffff)+((dip>>16)&0xffff);
+    presum+=IPPROTO_TCP+len;
+    tcphdr->checksum = htons(in_cksum((unsigned char *)tcphdr, len, presum));
 //
 //    // now on to the IP layer
-//    net_tx_ip(m, IPPROTO_UDP, dip);
+    printf("[net_tx_tcp]seq=%d,ack=%d\n",sequence_number,acknowledgment_number);
+    net_tx_ip(m, IPPROTO_TCP, dip);
 }
 
 // sends a UDP packet
@@ -409,38 +446,39 @@ option=1026 option=46085
 static void
 net_rx_tcp(struct mbuf *m, uint16 len, struct ip *iphdr) {
     struct tcp *tcphdr;
-    uint32 sip,dip;
+    uint32 sip;
     uint16 sport, dport;
 
     tcphdr = (struct tcp *)mbufpull(m, len);
     if (!tcphdr)
         goto fail;
 
-
-    mbuftrim(m, m->len - len);
+    printf("[net_rx_tcp]len=%d,mlen=%d\n",len,m->len);
+    m->len=0;
+//    mbuftrim(m, m->len - len);
 
     // parse the necessary fields
     sip = ntohl(iphdr->ip_src);
-    dip = ntohl(iphdr->ip_dst);
+//    dip = ntohl(iphdr->ip_dst);
     sport = ntohs(tcphdr->sport);
     dport = ntohs(tcphdr->dport);
 
     uint32 acknowledgment_number = ntohl(tcphdr->acknowledgment_number);
     uint32 sequence_number = ntohl(tcphdr->sequence_number);
-    uint16 checksum = ntohs(tcphdr->checksum);
+//    uint16 checksum = ntohs(tcphdr->checksum);
+//
+//    uint16 window = ntohs(tcphdr->window);
+//    uint16 urgent_pointers = ntohs(tcphdr->urgent_pointers);
+//    uint16 alltag = ntohs(tcphdr->alltag);
 
-    uint16 window = ntohs(tcphdr->window);
-    uint16 urgent_pointers = ntohs(tcphdr->urgent_pointers);
-    uint16 alltag = ntohs(tcphdr->alltag);
-
-    printf("[net_rx_tcp]sip=%d,dip=%d\n"
-           "sport=%d,dport=%d\n"
-           "sequence_number=%d,acknowledgment_number=%d\n"
-           "alltag=%d,window=%d,checksum=%d\n"
-           "urgent_pointers=%d\n", sip, dip, sport, dport,
-           sequence_number,acknowledgment_number,
-           alltag,window,checksum,
-           urgent_pointers);
+//    printf("[net_rx_tcp]sip=%d,dip=%d\n"
+//           "sport=%d,dport=%d\n"
+//           "sequence_number=%d,acknowledgment_number=%d\n"
+//           "alltag=%d,window=%d,checksum=%d\n"
+//           "urgent_pointers=%d\n", sip, dip, sport, dport,
+//           sequence_number,acknowledgment_number,
+//           alltag,window,checksum,
+//           urgent_pointers);
 //    uint16 presum=(sip&0xffff)+((sip>>16)&0xffff)+(dip&0xffff)+((dip>>16)&0xffff);
 //    tcphdr->checksum=0;
 //    presum+=IPPROTO_TCP+len;
@@ -451,6 +489,9 @@ net_rx_tcp(struct mbuf *m, uint16 len, struct ip *iphdr) {
 //
 //    }
 //    sockrecvtcp(m, sip, dport, sport);
+//    sockrecvtcp(m, sip, dport, sport, alltag&TCP_FLAG_SYN, sequence_number, acknowledgment_number);
+    sockrecvtcp(m, sip, dport, sport, tcphdr->syn, sequence_number, acknowledgment_number);
+
     return;
 
     fail:

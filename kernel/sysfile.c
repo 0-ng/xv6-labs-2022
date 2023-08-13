@@ -600,6 +600,7 @@ sys_tcp_connect(void)
   if(argfd(0, 0, &f) < 0)
     return;
   argint(1, (int*)&raddr);
+  printf("(int*)&raddr=%d\n",raddr);
   argint(2, (int*)&rport);
   tcp_connect(f->sock, raddr, rport);
 }

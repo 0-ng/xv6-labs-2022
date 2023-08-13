@@ -20,12 +20,16 @@ struct sock {
     uint16 lport;      // the local UDP port number
     uint16 rport;      // the remote UDP port number
     uint8 type;      // tcp 1; udp 2
+    uint32 sequence_number;  // 发送数据包中的第一个字节的序列号
+    uint32 acknowledgment_number;   // 确认序列号
     struct spinlock lock; // protects the rxq
     struct mbufq rxq;  // a queue of packets waiting to be received
 };
 
 static struct spinlock lock;
 static struct sock *sockets;
+static struct sock *syn_send_sockets;
+static struct sock *established_sockets;
 
 void
 sockinit(void) {
@@ -43,7 +47,7 @@ socket(struct file **f, uint8 type) {
     if ((si = (struct sock *) kalloc()) == 0)
         goto bad;
     si->type = type;
-    si->lport = 10086;
+    si->lport = 2001;
 // initialize objects
     initlock(&si->lock, "sock");
     mbufq_init(&si->rxq);
@@ -343,23 +347,183 @@ sockrecvudp(struct mbuf *m, uint32 raddr, uint16 lport, uint16 rport) {
     release(&lock);
 }
 
+// called by protocol handler layer to deliver TCP packets
+void
+sockrecvtcp(struct mbuf *m, uint32 raddr, uint16 lport, uint16 rport, uint8 isSYN, uint32 sequence_number, uint32 acknowledgment_number) {
+    //
+    // Find the socket that handles this mbuf and deliver it, waking
+    // any sleeping reader. Free the mbuf if there are no sockets
+    // registered to handle it.
+    //
+    struct sock *si;
+
+    acquire(&lock);
+    if(isSYN){
+        si = syn_send_sockets;
+        printf("[sockrecvtcp]isSYN\n");
+    }else{
+        si = established_sockets;
+        printf("[sockrecvtcp]is not SYN\n");
+    }
+    while (si) {
+        if (si->raddr == raddr && si->lport == lport && si->rport == rport)
+            goto found;
+        si = si->next;
+    }
+    release(&lock);
+    mbuffree(m);
+    printf("[sockrecvtcp]not found, raddr=%d, lport=%d, rport=%d\n", raddr, lport, rport);
+    return;
+
+    found:
+    acquire(&si->lock);
+    struct tcp_header *header;
+    header = mbufpushhdr(m, *header);
+    header->sequence_number = sequence_number;
+    header->acknowledgment_number = acknowledgment_number;
+    printf("[sockrecvtcp]seq=%d, ack=%d\n",sequence_number,acknowledgment_number);
+    mbufq_pushtail(&si->rxq, m);
+    wakeup(&si->rxq);
+    release(&si->lock);
+    release(&lock);
+    return;
+}
+
 
 void tcp_connect(struct sock *si, uint32 raddr, uint16 rport){
     printf("[tcp_connect]\n");
-    struct mbuf *m;
+    struct mbuf *m,*mm;
 
     m = mbufalloc(MBUF_DEFAULT_HEADROOM);
     if (!m)
         return;
 
     si->raddr=raddr;
+    si->raddr=2130706433;
+    si->raddr=MAKE_IP_ADDR(127,0,0,1);
+//    si->raddr=MAKE_IP_ADDR(192,168,1,10);
+    printf("rrraddr=%d\n", si->raddr);
     si->rport=rport;
+    si->sequence_number = 10086;
+    si->acknowledgment_number = 20;
     Dprintf("[tcp_connect]raddr=%d, rport=%d", si->raddr, si->rport, si->lport);
 
-//    net_tx_tcp(m, si->raddr, si->lport, si->rport);
+
+    // enter syn send
+    acquire(&lock);
+    struct sock* pos = syn_send_sockets;
+    while (pos) {
+        if (pos->raddr == raddr &&
+            pos->lport == si->lport &&
+            pos->rport == rport) {
+            release(&lock);
+            if (si)
+                kfree((char *) si);
+            return;
+        }
+        pos = pos->next;
+    }
+    si->next = syn_send_sockets;
+    syn_send_sockets = si;
+    release(&lock);
+
+    // send syn
+    char *c="abcde";
+    uint8 dlen=5;
+//    copyin(myproc()->pagetable, m->head, (uint64)c, dlen);
+//    m->len += dlen;
+//    c =  mbufput(m, 5);
+//    c[0]='a';
+//    c[1]='b';
+//    c[2]='c';
+//    c[3]='d';
+//    c[4]='e';
+    net_tx_tcp(m, si->raddr, si->lport, si->rport, si->sequence_number, si->acknowledgment_number, TCP_FLAG_SYN);
+//    si->sequence_number+=dlen;
+//    return;
+    // sleep for syn ack
+    struct proc *pr = myproc();
+
+    acquire(&si->lock);
+    while (mbufq_empty(&si->rxq) && !pr->killed) {
+        sleep(&si->rxq, &si->lock);
+    }
+    if (pr->killed) {
+        release(&si->lock);
+        return;
+    }
+    mm = mbufq_pophead(&si->rxq);
+    release(&si->lock);
+
+    // remove from syn sended
+
+    acquire(&lock);
+    pos = syn_send_sockets;
+    if(pos&&pos->raddr == raddr &&
+       pos->lport == si->lport &&
+       pos->rport == rport){
+        syn_send_sockets = syn_send_sockets->next;
+    }else{
+        while (pos->next) {
+            if (pos->next->raddr == raddr &&
+                pos->next->lport == si->lport &&
+                pos->next->rport == rport) {
+                pos->next=pos->next->next;
+                break;
+            }
+            pos = pos->next;
+        }
+    }
+    release(&lock);
+
+    // enter established
+    acquire(&lock);
+    si->next = established_sockets;
+    established_sockets = si;
+    release(&lock);
+
+    // return ack
+    struct tcp_header *header;
+    header = mbufpullhdr(mm, *header);
+    printf("[tcp_connect]header seq=%d, ack=%d\n",header->sequence_number,header->acknowledgment_number);
+    si->sequence_number++;
+    si->acknowledgment_number=header->sequence_number+1;
+
+    m = mbufalloc(MBUF_DEFAULT_HEADROOM);
+//    c =  mbufput(m, 5);
+//    c[0]='a';
+//    c[1]='b';
+//    c[2]='c';
+//    c[3]='d';
+//    c[4]='e';
+//    copyin(myproc()->pagetable, m->head, (uint64)c, dlen);
+//    m->len += dlen;
+    net_tx_tcp(m, si->raddr, si->lport, si->rport, si->sequence_number, si->acknowledgment_number, TCP_FLAG_ACK);
+//    si->sequence_number+=dlen;
+
+    m = mbufalloc(MBUF_DEFAULT_HEADROOM);
+    copyin(myproc()->pagetable, m->head, (uint64)c, dlen);
+    m->len += dlen;
+    net_tx_tcp(m, si->raddr, si->lport, si->rport, si->sequence_number, si->acknowledgment_number, TCP_FLAG_ACK|TCP_FLAG_PSH);
+    si->sequence_number+=dlen;
 }
 
 void sendall(struct sock *si, uint64 addr, int n){
     printf("[sendall]\n");
 
+    struct proc *pr = myproc();
+    struct mbuf *m;
+
+    m = mbufalloc(MBUF_DEFAULT_HEADROOM);
+    if (!m)
+        return;
+
+    if (copyin(pr->pagetable, mbufput(m, n), addr, n) == -1) {
+        mbuffree(m);
+        return;
+    }
+    printf("[sockwrite]raddr=%d, rport=%d, lport=%d\n", si->raddr, si->rport, si->lport);
+    net_tx_tcp(m, si->raddr, si->lport, si->rport, si->sequence_number, si->acknowledgment_number, TCP_FLAG_ACK|TCP_FLAG_PSH);
+    si->sequence_number+=n;
+    return;
 }

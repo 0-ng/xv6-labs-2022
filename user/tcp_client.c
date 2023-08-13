@@ -55,9 +55,13 @@
 int
 main(int argc, char *argv[]) {
     int client_fd = socket(127 << 24 | 0 << 16 | 0 << 8 | 1, SOCK_STREAM, 0);
+    printf("%d\n",127 << 24 | 0 << 16 | 0 << 8 | 1);
     tcp_connect(client_fd, 127 << 24 | 0 << 16 | 0 << 8 | 1, 65432);
-    char *obuf="from tcp client!";
-    sendall(client_fd, obuf, strlen(obuf));
+//    char *obuf="from tcp client!";
+//    for(int i=0;i<5;i++){
+//        sendall(client_fd, obuf, strlen(obuf));
+//    }
+    sleep(1000);
     close(client_fd);
     exit(0);
 }
