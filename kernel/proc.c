@@ -51,8 +51,11 @@ procinit(void)
   
   initlock(&pid_lock, "nextpid");
   initlock(&wait_lock, "wait_lock");
-  for(p = proc; p < &proc[NPROC]; p++) {
-      initlock(&p->lock, "proc");
+  int id=0;
+  for(p = proc; p < &proc[NPROC]; p++,id++){
+      int sz=6+(id>=10);
+      snprintf(p->lockname, sz, "proc_%d", id);
+      initlock(&p->lock, p->lockname);
       p->state = UNUSED;
       p->kstack = KSTACK((int) (p - proc));
   }
