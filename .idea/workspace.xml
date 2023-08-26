@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeRunConfigurationManager">
+    <generated />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d1963fa3-e58d-49a5-8ca5-35dad8a0db43" name="Changes" comment="format" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="clangTidyViaClangd" value="false" />
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="fs" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;0-ng&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="51798cda-0274-47ad-ab08-af663bfce298" />
+        <option name="url" value="git@github.com:0-ng/xv6-labs-2022.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="MakefileLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="xv6-labs-2022" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="xv6-labs-2022" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$" value="RE_IMPORT" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectApplicationVersion">
+    <option name="ide" value="CLion" />
+    <option name="majorVersion" value="2023" />
+    <option name="minorVersion" value="1.4" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="2S11kDbyKjmiwGFGLQfmTCoHrWg" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/leung/mit/xv6-labs-2022&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;structure.view.defaults.are.configured&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/user" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d1963fa3-e58d-49a5-8ca5-35dad8a0db43" name="Changes" comment="" />
+      <created>1688299414037</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1688299414037</updated>
+      <workItem from="1688299415275" duration="7311000" />
+      <workItem from="1688558306454" duration="14825000" />
+      <workItem from="1688730117215" duration="1559000" />
+      <workItem from="1688997079285" duration="7307000" />
+      <workItem from="1689174609131" duration="4961000" />
+      <workItem from="1689255991098" duration="9401000" />
+      <workItem from="1689400199935" duration="9592000" />
+      <workItem from="1689424820502" duration="6393000" />
+      <workItem from="1689515779388" duration="7831000" />
+      <workItem from="1689599774919" duration="10790000" />
+      <workItem from="1689777908415" duration="3723000" />
+      <workItem from="1689994016447" duration="17596000" />
+      <workItem from="1690089856922" duration="9916000" />
+      <workItem from="1690295728432" duration="5120000" />
+      <workItem from="1690378184979" duration="7762000" />
+      <workItem from="1690469234099" duration="4933000" />
+      <workItem from="1690598561946" duration="28000" />
+      <workItem from="1690598599488" duration="24000" />
+      <workItem from="1690598640526" duration="21000" />
+      <workItem from="1690598663882" duration="69000" />
+      <workItem from="1690598768831" duration="17421000" />
+      <workItem from="1690697127824" duration="618000" />
+      <workItem from="1692408410994" duration="6389000" />
+      <workItem from="1692973581649" duration="4536000" />
+      <workItem from="1693015741186" duration="13389000" />
+    </task>
+    <task id="LOCAL-00001" summary="refactor">
+      <option name="closed" value="true" />
+      <created>1688304577241</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1688304577241</updated>
+    </task>
+    <task id="LOCAL-00002" summary="thread">
+      <option name="closed" value="true" />
+      <created>1688576278266</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1688576278266</updated>
+    </task>
+    <task id="LOCAL-00003" summary="net">
+      <option name="closed" value="true" />
+      <created>1689426876720</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1689426876720</updated>
+    </task>
+    <task id="LOCAL-00004" summary="arp">
+      <option name="closed" value="true" />
+      <created>1689520983213</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1689520983213</updated>
+    </task>
+    <task id="LOCAL-00005" summary="arp">
+      <option name="closed" value="true" />
+      <created>1689780617861</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1689780617861</updated>
+    </task>
+    <task id="LOCAL-00006" summary="icmp">
+      <option name="closed" value="true" />
+      <created>1690016118154</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1690016118154</updated>
+    </task>
+    <task id="LOCAL-00007" summary="sock type">
+      <option name="closed" value="true" />
+      <created>1690296639417</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1690296639417</updated>
+    </task>
+    <task id="LOCAL-00008" summary="frame">
+      <option name="closed" value="true" />
+      <created>1690299370450</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1690299370450</updated>
+    </task>
+    <task id="LOCAL-00009" summary="format">
+      <option name="closed" value="true" />
+      <created>1692974208860</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1692974208860</updated>
+    </task>
+    <task id="LOCAL-00010" summary="format">
+      <option name="closed" value="true" />
+      <created>1693016207568</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1693016207568</updated>
+    </task>
+    <task id="LOCAL-00011" summary="symlink">
+      <option name="closed" value="true" />
+      <created>1693028209223</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1693028209223</updated>
+    </task>
+    <task id="LOCAL-00012" summary="symlink">
+      <option name="closed" value="true" />
+      <created>1693028306160</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1693028306160</updated>
+    </task>
+    <task id="LOCAL-00013" summary="format">
+      <option name="closed" value="true" />
+      <created>1693029743535</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1693029743535</updated>
+    </task>
+    <task id="LOCAL-00014" summary="format">
+      <option name="closed" value="true" />
+      <created>1693038382758</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1693038382758</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticEditVcpkgJson value="false" />
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticFoundErrors value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="refactor" />
+    <MESSAGE value="thread" />
+    <MESSAGE value="net" />
+    <MESSAGE value="arp" />
+    <MESSAGE value="icmp" />
+    <MESSAGE value="sock type" />
+    <MESSAGE value="frame" />
+    <MESSAGE value="symlink" />
+    <MESSAGE value="format" />
+    <option name="LAST_COMMIT_MESSAGE" value="format" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/user/tcp_client.c</url>
+          <line>61</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
