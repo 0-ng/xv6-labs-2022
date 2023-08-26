@@ -523,10 +523,10 @@ sys_symlink(void) {
         end_op();
         return -1;
     }
-    writei(ip, 0, (uint64) old, 0, MAXPATH);
-    char path[MAXPATH];
-    readi(ip,0,(uint64)path,0,MAXPATH);
-//    printf("old=%s, new=%s, path=%s\n",old,new,path);
+    if (writei(ip, 0, (uint64) old, 0, MAXPATH) == 0) {
+        end_op();
+        return -1;
+    }
     iunlockput(ip);
 
     end_op();

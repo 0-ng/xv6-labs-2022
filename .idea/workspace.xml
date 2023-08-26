@@ -12,16 +12,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d1963fa3-e58d-49a5-8ca5-35dad8a0db43" name="Changes" comment="format">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/fcntl.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/fcntl.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/syscall.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/syscall.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/syscall.h" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/syscall.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/kernel/sysfile.c" beforeDir="false" afterPath="$PROJECT_DIR$/kernel/sysfile.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/symlinktest.c" beforeDir="false" afterPath="$PROJECT_DIR$/user/symlinktest.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/user.h" beforeDir="false" afterPath="$PROJECT_DIR$/user/user.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/user/usys.pl" beforeDir="false" afterPath="$PROJECT_DIR$/user/usys.pl" afterDir="false" />
-    </list>
+    <list default="true" id="d1963fa3-e58d-49a5-8ca5-35dad8a0db43" name="Changes" comment="symlink" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -154,7 +145,7 @@
       <workItem from="1690697127824" duration="618000" />
       <workItem from="1692408410994" duration="6389000" />
       <workItem from="1692973581649" duration="4536000" />
-      <workItem from="1693015741186" duration="8006000" />
+      <workItem from="1693015741186" duration="8357000" />
     </task>
     <task id="LOCAL-00001" summary="refactor">
       <option name="closed" value="true" />
@@ -236,7 +227,15 @@
       <option name="project" value="LOCAL" />
       <updated>1693016207568</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="symlink">
+      <option name="closed" value="true" />
+      <created>1693028209223</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1693028209223</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -268,7 +267,8 @@
     <MESSAGE value="sock type" />
     <MESSAGE value="frame" />
     <MESSAGE value="format" />
-    <option name="LAST_COMMIT_MESSAGE" value="format" />
+    <MESSAGE value="symlink" />
+    <option name="LAST_COMMIT_MESSAGE" value="symlink" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
