@@ -107,7 +107,7 @@ mmap_test(void) {
     // of the file to be mapped. the last argument is the starting
     // offset in the file.
     //
-    char *p = mmap(0, PGSIZE * 2, PROT_READ, MAP_PRIVATE, fd, 0);
+    char *p = (char *)mmap(0, PGSIZE * 2, PROT_READ, MAP_PRIVATE, fd, 0);
     if (p == MAP_FAILED)
         err("mmap (1)");
     _v1(p);
@@ -119,7 +119,7 @@ mmap_test(void) {
     printf("test mmap private\n");
     // should be able to map file opened read-only with private writable
     // mapping
-    p = mmap(0, PGSIZE * 2, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    p = (char *)mmap(0, PGSIZE * 2, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
     if (p == MAP_FAILED)
         err("mmap (2)");
     if (close(fd) == -1)
@@ -138,7 +138,7 @@ mmap_test(void) {
     // file opened read-only.
     if ((fd = open(f, O_RDONLY)) == -1)
         err("open");
-    p = mmap(0, PGSIZE * 3, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    p = (char *)mmap(0, PGSIZE * 3, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (p != MAP_FAILED)
         err("mmap call should have failed");
     if (close(fd) == -1)
@@ -152,7 +152,7 @@ mmap_test(void) {
     // file opened read/write.
     if ((fd = open(f, O_RDWR)) == -1)
         err("open");
-    p = mmap(0, PGSIZE * 3, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    p = (char *)mmap(0, PGSIZE * 3, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (p == MAP_FAILED)
         err("mmap (3)");
     if (close(fd) == -1)
@@ -207,7 +207,7 @@ mmap_test(void) {
         err("open mmap1");
     if (write(fd1, "12345", 5) != 5)
         err("write mmap1");
-    char *p1 = mmap(0, PGSIZE, PROT_READ, MAP_PRIVATE, fd1, 0);
+    char *p1 = (char *)mmap(0, PGSIZE, PROT_READ, MAP_PRIVATE, fd1, 0);
     if (p1 == MAP_FAILED)
         err("mmap mmap1");
     close(fd1);
@@ -218,7 +218,7 @@ mmap_test(void) {
         err("open mmap2");
     if (write(fd2, "67890", 5) != 5)
         err("write mmap2");
-    char *p2 = mmap(0, PGSIZE, PROT_READ, MAP_PRIVATE, fd2, 0);
+    char *p2 = (char *)mmap(0, PGSIZE, PROT_READ, MAP_PRIVATE, fd2, 0);
     if (p2 == MAP_FAILED)
         err("mmap mmap2");
     close(fd2);
@@ -257,10 +257,10 @@ fork_test(void) {
     if ((fd = open(f, O_RDONLY)) == -1)
         err("open");
     unlink(f);
-    char *p1 = mmap(0, PGSIZE * 2, PROT_READ, MAP_SHARED, fd, 0);
+    char *p1 = (char *)mmap(0, PGSIZE * 2, PROT_READ, MAP_SHARED, fd, 0);
     if (p1 == MAP_FAILED)
         err("mmap (4)");
-    char *p2 = mmap(0, PGSIZE * 2, PROT_READ, MAP_SHARED, fd, 0);
+    char *p2 = (char *)mmap(0, PGSIZE * 2, PROT_READ, MAP_SHARED, fd, 0);
     if (p2 == MAP_FAILED)
         err("mmap (5)");
 
