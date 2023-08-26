@@ -323,6 +323,26 @@ sys_open(void) {
         }
     }
 
+    if (ip->type == T_SYMLINK && (omode & O_NOFOLLOW) == 0) {
+        for (int i = 0; i < 10; i++) {
+//            printf("round %d path=%s\n",i,path);
+            readi(ip, 0, (uint64) path, 0, MAXPATH);
+            iunlockput(ip);
+            if ((ip = namei(path)) == 0) {
+                end_op();
+                return -1;
+            }
+            ilock(ip);
+            if (ip->type != T_SYMLINK)goto found;
+        }
+        iunlockput(ip);
+        end_op();
+        return -1;
+
+        found:
+    }
+
+
     if (ip->type == T_DEVICE && (ip->major < 0 || ip->major >= NDEV)) {
         iunlockput(ip);
         end_op();
@@ -485,4 +505,32 @@ sys_pipe(void) {
         return -1;
     }
     return 0;
+}
+
+
+uint64
+sys_symlink(void) {
+    char new[MAXPATH], old[MAXPATH];
+    struct inode *ip;
+
+    if (argstr(0, old, MAXPATH) < 0 || argstr(1, new, MAXPATH) < 0)
+        return -1;
+
+    begin_op();
+
+    ip = create(new, T_SYMLINK, 0, 0);
+    if (ip == 0) {
+        end_op();
+        return -1;
+    }
+    writei(ip, 0, (uint64) old, 0, MAXPATH);
+    char path[MAXPATH];
+    readi(ip,0,(uint64)path,0,MAXPATH);
+//    printf("old=%s, new=%s, path=%s\n",old,new,path);
+    iunlockput(ip);
+
+    end_op();
+
+    return 0;
+
 }
