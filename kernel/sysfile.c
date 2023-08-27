@@ -486,3 +486,60 @@ sys_pipe(void) {
     }
     return 0;
 }
+
+uint64
+sys_mmap(void) {
+    struct file *f;
+    int length,prot,flags,offset;
+//    uint64 addr;
+
+//    argaddr(0, &addr);
+    argint(1, &length);
+    argint(2, &prot);
+    argint(3, &flags);
+    if (argfd(4, 0, &f) < 0)
+        return -1;
+    argint(5, &offset);
+
+//#define PROT_NONE       0x0
+//#define PROT_READ       0x1
+//#define PROT_WRITE      0x2
+//#define PROT_EXEC       0x4
+//
+//#define MAP_SHARED      0x01
+//#define MAP_PRIVATE     0x02
+    offset=PGROUNDDOWN(offset);
+
+    uint64 retAddr = myproc()->sz;
+    if(growproc(length) < 0)
+        return -1;
+    for(int i=0,va=retAddr;i<length;i+=PGSIZE,va+=PGSIZE,offset+=PGSIZE){
+        uint64 pa=f->ip->addrs[offset];// TODO
+
+
+        if (mappages(new, va, PGSIZE, pa, flags) != 0) {
+            kfree(mem);
+            goto err;
+        }
+
+    }
+
+
+    return fileread(f, p, n);
+    return 0;
+}
+
+//void *mmap(void *addr, int length, int prot, int flags,
+//           int fd, int offset);
+//
+//int munmap(void *addr, int length);
+uint64
+sys_munmap(void) {
+    int offset;
+    uint64 addr;
+    argaddr(0, &addr);
+    argint(1, &offset);
+
+
+    return 0;
+}
