@@ -134,6 +134,14 @@ allocproc(void) {
         return 0;
     }
 
+    // init vma
+    memset(p->vma, 0, sizeof(p->vma));
+    for (int i = 0; i < VMA_NUM; i++) {
+        p->vma[i].vm_start = VMABEGIN(i);
+        p->vma[i].free_start = VMABEGIN(i);
+        p->vma[i].vm_end = VMAEND(i);
+    }
+
     // Set up new context to start executing at forkret,
     // which returns to user space.
     memset(&p->context, 0, sizeof(p->context));
@@ -153,6 +161,9 @@ freeproc(struct proc *p) {
     p->trapframe = 0;
     if (p->pagetable)
         proc_freepagetable(p->pagetable, p->sz);
+
+
+
     p->pagetable = 0;
     p->sz = 0;
     p->pid = 0;
@@ -273,15 +284,29 @@ fork(void) {
 
     // Allocate process.
     if ((np = allocproc()) == 0) {
+//        printf("err allocproc\n");
         return -1;
     }
 
     // Copy user memory from parent to child.
     if (uvmcopy(p->pagetable, np->pagetable, p->sz) < 0) {
+//        printf("err uvmcopy\n");
         freeproc(np);
         release(&np->lock);
         return -1;
     }
+
+
+    for (int i = 0; i < VMA_NUM; i++) {
+        if(p->vma[i].file){
+//            printf("[%d]->[%d] alloc [%p,%p], size=%p, prot=%d, offset=%d\n",p->pid,np->pid,p->vma[i].vm_start, p->vma[i].vm_end, p->vma[i].file_size, p->vma[i].prot, p->vma[i].file_offset);
+            np->vma[i]=p->vma[i];
+//            for(int j=p->vma[i].)
+//            filedup(np->vma[i].file);
+        }
+    }
+
+
     np->sz = p->sz;
 
     // copy saved user registers.
@@ -345,6 +370,14 @@ exit(int status) {
             p->ofile[fd] = 0;
         }
     }
+
+    for (int i = 0; i < VMA_NUM; i++) {
+        if(p->vma[i].file){
+            munmap(p->vma[i].free_start,p->vma[i].file_size-(p->vma[i].free_start-p->vma[i].vm_start));
+        }
+    }
+
+
 
     begin_op();
     iput(p->cwd);

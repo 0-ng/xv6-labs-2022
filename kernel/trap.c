@@ -5,11 +5,18 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "defs.h"
+#include "fs.h"
+#include "sleeplock.h"
+#include "file.h"
 
 struct spinlock tickslock;
 uint ticks;
 
 extern char trampoline[], uservec[], userret[];
+
+#define INSTRUCTION_PAGE_FAULT   12
+#define LOAD_PAGE_FAULT 13
+#define STORE_PAGE_FAULT   15
 
 // in kernelvec.S, calls kerneltrap().
 void kernelvec();
@@ -25,6 +32,50 @@ trapinit(void) {
 void
 trapinithart(void) {
     w_stvec((uint64) kernelvec);
+}
+
+int prot_to_perm(uint32 prot){
+//    return PTE_R|PTE_V|PTE_W|PTE_U;
+    return (prot<<1)|PTE_U;
+}
+
+
+int
+alloc_block_for_mmap(struct proc *p, uint64 va) {
+    struct vma_struct *vma;
+    if ((vma = find_vma_intersection(va)) == 0) {
+        printf("find vma error\n");
+        return 0;
+    }
+//    printf("va=%p, vma [%p, %p] size=%p\n",va, vma->vm_start,vma->vm_end,vma->file_size);
+    uint64 offset = va - vma->vm_start;
+    if (offset > vma->file_size) {
+        printf("va=%p, offset=%p, size=%p\n",va,vma->vm_start,vma->file_size);
+        printf("offset out of size\n");
+        return 0;
+    }
+    uint64 pa;
+    if ((pa = (uint64)kalloc()) == 0) {
+        printf("kalloc error\n");
+        return 0;
+    }
+//    printf("read %d\n",offset+vma->file_offset);
+    ilock(vma->file->ip);
+    uint nn=readi(vma->file->ip, 0, pa, offset + vma->file_offset, PGSIZE);
+    iunlock(vma->file->ip);
+    uint64 a=0;
+    for(int i=nn;i<PGSIZE;i+=sizeof(a)){
+        either_copyout(0, pa+i, &a, sizeof(a));
+    }
+    printf("pid=%d alloc va=%p, pa=%p\n",p->pid,va,pa);
+//    printf("read %d\n",nn);
+//    printf("map page=%d\n",prot_to_perm(vma->prot));
+    if (mappages(p->pagetable, va, PGSIZE, pa, prot_to_perm(vma->prot)) < 0) {
+        printf("map page error\n");
+        kfree((void *)pa);
+        return 0;
+    }
+    return 1;
 }
 
 //
@@ -64,6 +115,11 @@ usertrap(void) {
         syscall();
     } else if ((which_dev = devintr()) != 0) {
         // ok
+    } else if (r_scause() == LOAD_PAGE_FAULT) {
+        if (alloc_block_for_mmap(p, r_stval()) == 0) {
+            printf("alloc block for mmap error\n");
+            setkilled(p);
+        }
     } else {
         printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
         printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());

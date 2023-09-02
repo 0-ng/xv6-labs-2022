@@ -508,25 +508,26 @@ sys_mmap(void) {
 //
 //#define MAP_SHARED      0x01
 //#define MAP_PRIVATE     0x02
-    offset=PGROUNDDOWN(offset);
-
-    uint64 retAddr = myproc()->sz;
-    if(growproc(length) < 0)
+    if((prot&PROT_READ) && (f->readable==0)){
         return -1;
-    for(int i=0,va=retAddr;i<length;i+=PGSIZE,va+=PGSIZE,offset+=PGSIZE){
-        uint64 pa=f->ip->addrs[offset];// TODO
-
-
-        if (mappages(new, va, PGSIZE, pa, flags) != 0) {
-            kfree(mem);
-            goto err;
-        }
-
     }
-
-
-    return fileread(f, p, n);
-    return 0;
+    if(flags&MAP_SHARED){
+        if((prot&PROT_WRITE) && (f->writable==0)){
+            return -1;
+        }
+    }
+    struct vma_struct *vma;
+    if((vma=find_free_vma())==0){
+        return -1;
+    }
+    vma->file_size=length;
+    vma->prot=prot;
+    vma->flag=flags;
+    vma->file=f;
+    vma->file_offset=offset;
+    filedup(f);
+//    printf("[%d] alloc [%p,%p], size=%p, prot=%d, offset=%d\n",myproc()->pid,vma->vm_start, vma->vm_end, vma->file_size, vma->prot, vma->file_offset);
+    return vma->vm_start;
 }
 
 //void *mmap(void *addr, int length, int prot, int flags,
@@ -535,11 +536,9 @@ sys_mmap(void) {
 //int munmap(void *addr, int length);
 uint64
 sys_munmap(void) {
-    int offset;
+    int length;
     uint64 addr;
     argaddr(0, &addr);
-    argint(1, &offset);
-
-
-    return 0;
+    argint(1, &length);
+    return munmap(addr, length);
 }

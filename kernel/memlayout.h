@@ -45,6 +45,8 @@
 // for use by the kernel and user pages
 // from physical address 0x80000000 to PHYSTOP.
 #define KERNBASE 0x80000000L
+//#define KERNBASE 0x70000000L
+//#define PHYSTOP (KERNBASE + 128*1024*1024)
 #define PHYSTOP (KERNBASE + 128*1024*1024)
 
 // map the trampoline page to the highest address,
@@ -65,3 +67,10 @@
 //   TRAPFRAME (p->trapframe, used by the trampoline)
 //   TRAMPOLINE (the same page as in the kernel)
 #define TRAPFRAME (TRAMPOLINE - PGSIZE)
+
+#define VMA_NUM 16
+#define VMA_PAGE 16
+
+#define VMA (TRAPFRAME - PGSIZE*VMA_PAGE*VMA_NUM)
+#define VMABEGIN(p) (TRAPFRAME - PGSIZE*VMA_PAGE*(VMA_NUM-p))
+#define VMAEND(p) (TRAPFRAME - PGSIZE*VMA_PAGE*(VMA_NUM-p-1))

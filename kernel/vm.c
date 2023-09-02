@@ -5,6 +5,11 @@
 #include "riscv.h"
 #include "defs.h"
 #include "fs.h"
+#include "spinlock.h"
+#include "sleeplock.h"
+#include "proc.h"
+#include "file.h"
+#include "fcntl.h"
 
 /*
  * the kernel's page table.
@@ -89,8 +94,10 @@ walk(pagetable_t pagetable, uint64 va, int alloc) {
         if (*pte & PTE_V) {
             pagetable = (pagetable_t) PTE2PA(*pte);
         } else {
-            if (!alloc || (pagetable = (pde_t *) kalloc()) == 0)
+            if (!alloc || (pagetable = (pde_t *) kalloc()) == 0){
+                printf("!alloc || (pagetable = (pde_t *) kalloc()) == 0\n");
                 return 0;
+            }
             memset(pagetable, 0, PGSIZE);
             *pte = PA2PTE(pagetable) | PTE_V;
         }
@@ -144,11 +151,14 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm) {
     a = PGROUNDDOWN(va);
     last = PGROUNDDOWN(va + size - 1);
     for (;;) {
-        if ((pte = walk(pagetable, a, 1)) == 0)
+        if ((pte = walk(pagetable, a, 1)) == 0){
+            printf("walk error\n");
             return -1;
+        }
         if (*pte & PTE_V)
             panic("mappages: remap");
         *pte = PA2PTE(pa) | perm | PTE_V;
+//        printf("[mappages]va=%p, pa=%p pte=%p\n",a, PTE2PA(*pte),*pte);
         if (a == last)
             break;
         a += PGSIZE;
@@ -267,6 +277,8 @@ freewalk(pagetable_t pagetable) {
             freewalk((pagetable_t) child);
             pagetable[i] = 0;
         } else if (pte & PTE_V) {
+
+            printf("freewalk pa=%p, flag=%d\n",PTE2PA(pte),pte);
             panic("freewalk: leaf");
         }
     }
@@ -302,10 +314,13 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz) {
             panic("uvmcopy: page not present");
         pa = PTE2PA(*pte);
         flags = PTE_FLAGS(*pte);
-        if ((mem = kalloc()) == 0)
+        if ((mem = kalloc()) == 0){
+            printf("kalloc error\n");
             goto err;
+        }
         memmove(mem, (char *) pa, PGSIZE);
         if (mappages(new, i, PGSIZE, (uint64) mem, flags) != 0) {
+            printf("mappages error\n");
             kfree(mem);
             goto err;
         }
@@ -417,4 +432,81 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max) {
     } else {
         return -1;
     }
+}
+
+struct vma_struct *find_free_vma() {
+    struct proc *p = myproc();
+    for (int i = 0; i < VMA_NUM; i++) {
+        if (p->vma[i].file == 0) {
+            return &p->vma[i];
+        }
+    }
+    return 0;
+}
+
+struct vma_struct *find_vma(uint64 va) {
+    struct proc *p = myproc();
+    for (int i = 0; i < VMA_NUM; i++) {
+        if (va < p->vma[i].vm_end) {
+            return &p->vma[i];
+        }
+    }
+    return 0;
+}
+
+struct vma_struct *find_vma_intersection(uint64 va) {
+    struct vma_struct *vma;
+    if ((vma = find_vma(va)) == 0) {
+        return 0;
+    }
+    if (vma->vm_start <= va) {
+        return vma;
+    }
+//    printf("find va=%p but vma start=%p, end=%p\n",va, vma->vm_start, vma->vm_end);
+    return 0;
+}
+
+int munmap(uint64 addr, int length){
+
+    struct vma_struct *vma;
+    if((vma=find_vma_intersection(addr))==0){
+        return -1;
+    }
+//    vma->file_size-=length;
+//    vma->prot=prot;
+//    vma->flag=flags;
+//    vma->file=f;
+//    printf("[%d] free [%p,%p], from=%p, size=%p\n",myproc()->pid,vma->vm_start, vma->vm_end, addr, length);
+    vma->free_start=addr+length;
+
+    if(vma->flag&MAP_SHARED){
+        begin_op();
+        ilock(vma->file->ip);
+        writei(vma->file->ip, 1, addr, (addr-vma->vm_start)+vma->file_offset, length);
+        iunlock(vma->file->ip);
+        end_op();
+    }
+    for(uint64 i=addr;i<addr+length;i+=PGSIZE){
+        pte_t *pte;
+        if ((pte = walk(myproc()->pagetable, i, 0)) == 0){
+            continue;
+        }
+        if ((*pte & PTE_V) == 0){
+            continue;
+        }
+        printf("pid=%d free va=%p, pa=%p pte=%p\n",myproc()->pid,i, PTE2PA(*pte),*pte);
+        uvmunmap(myproc()->pagetable,i,1,1);
+    }
+
+
+//    vma->file_offset+=length;
+    if(vma->file_size<=0){
+        fileclose(vma->file);
+        vma->prot=0;
+        vma->flag=0;
+        vma->file=0;
+        vma->file_offset=0;
+    }
+    return 0;
+
 }

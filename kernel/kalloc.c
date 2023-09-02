@@ -8,6 +8,7 @@
 #include "spinlock.h"
 #include "riscv.h"
 #include "defs.h"
+#include "proc.h"
 
 void freerange(void *pa_start, void *pa_end);
 
@@ -35,6 +36,7 @@ freerange(void *pa_start, void *pa_end)
 {
   char *p;
   p = (char*)PGROUNDUP((uint64)pa_start);
+//    printf("free %d\n",(pa_end-(void *)p)/PGSIZE);
   for(; p + PGSIZE <= (char*)pa_end; p += PGSIZE)
     kfree(p);
 }
@@ -68,6 +70,9 @@ kfree(void *pa)
 void *
 kalloc(void)
 {
+//    struct cpu *c = mycpu();
+//    struct proc *p = c->proc;
+//    printf("%d alloc\n",p->pid);
   struct run *r;
 
   acquire(&kmem.lock);
